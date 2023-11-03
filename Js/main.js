@@ -7,6 +7,8 @@ window.onload = () =>{
     const ANCHO = CANVAS.width
     const ALTO = CANVAS.height
 
+    const pruebaGit = 'hola'
+
     function player(x,y,col){
         this.x = x
         this.y =  y
