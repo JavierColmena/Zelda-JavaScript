@@ -5,9 +5,7 @@ window.onload = () =>{
     let id1, animation
 
     const ANCHO = CANVAS.width
-    const ALTO = CANVAS.height
-
-    const pruebaGit = 'hola'
+    const ALTO = CANVAS.height  
 
     function player(x,y,col){
         this.x = x
