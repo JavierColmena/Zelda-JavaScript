@@ -10,6 +10,7 @@ window.onload = () => {
     const ANCHOCANVAS = CANVAS.width
     const ALTOCANVAS = CANVAS.height
     
+    let github = 'hola'
 
     let imagen
 
@@ -86,8 +87,6 @@ window.onload = () => {
         // Calcula las coordenadas de los tiles que el jugador está tocando
         const tileX = Math.floor((this.x + this.tamañoX/2) / this.tamañoX);
         const tileY = Math.floor((this.y + this.tamañoY-8 / 2) / this.tamañoY);
-
-
 
         // Verifica la colisión con el tile en el que se encuentra el jugador
         const tileValue = pantalla[tileY][tileX];
