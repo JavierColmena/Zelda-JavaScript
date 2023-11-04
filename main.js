@@ -4,11 +4,12 @@ window.onload = () => {
     let ctx = CANVAS.getContext('2d')
 
     let id1, animation
-    CANVAS.width = 256
-    CANVAS.height = 240
+    const scale = 3
+    CANVAS.width = 256 * scale
+    CANVAS.height = 240 * scale
     const ANCHOCANVAS = CANVAS.width
     const ALTOCANVAS = CANVAS.height
-    const scale = 1
+    
 
     let imagen
 
@@ -19,6 +20,8 @@ window.onload = () => {
     let posicion = 0;
     let yArriba, yAbajo, xDerecha, xIzquierda
 
+
+    let indiceMap = 0
 
     imagen = new Image()
     imagen.src = "./Imagenes/link.png"
@@ -35,7 +38,7 @@ window.onload = () => {
 
         this.tamañoX = 16 * scale
         this.tamañoY = 16 * scale
-        this.velocidad = 2
+        this.velocidad = 7
 
         this.isMoving = false
 
@@ -74,6 +77,8 @@ window.onload = () => {
 
     Player.prototype.imagen = imagen
 
+
+    //NO ES MIA, ES DE CHATGPT
     Player.prototype.colisionaConMapa = function (mapa) {
         // Calcula las coordenadas de los tiles que el jugador está tocando
         const tileX = Math.floor((this.x + this.tamañoX / 2) / this.tamañoX);
@@ -102,7 +107,26 @@ window.onload = () => {
             [25, 25, 2, 2, 2, 2, 25, 2, 2, 2, 2, 2, 2, 2, 2, 2],
             [25, 25, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
             [25, 25, 25, 2, 2, 2, 25, 25, 25, 25, 2, 2, 2, 25, 25, 2],
+            [25, 25, 25, 2, 2, 2, 25, 25, 25, 25, 2, 2, 2, 25, 25, 2]
+        ],
+        [
+            //MENU
+            [22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22],
+            [22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22],
+            [22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22],
+            [22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22],
+            //MAPA
+            [25, 25, 25, 25, 25, 25, 25, 2, 2, 96, 97, 97, 97, 97, 97, 97],
+            [25, 25, 25, 25, 25, 25, 25, 2, 2, 96, 97, 97, 97, 97, 97, 97],
+            [25, 25, 2, 2, 2, 2, 2, 2, 2, 96, 97, 97, 97, 97, 97, 97],
+            [25, 25, 2, 2, 2, 2, 25, 2, 2, 96, 97, 97, 97, 97, 97, 97],
+            [2, 2, 2, 25, 25, 2, 2, 2, 2, 96, 97, 97, 97, 97, 97, 97],
+            [2, 2, 2, 25, 25, 2, 25, 2, 2, 114, 115, 115, 115, 115, 115, 115],
+            [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+            [25, 25, 2, 2, 2, 2, 25, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+            [25, 25, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
             [25, 25, 25, 2, 2, 2, 25, 25, 25, 25, 2, 2, 2, 25, 25, 2],
+            [25, 25, 25, 2, 2, 2, 25, 25, 25, 25, 2, 2, 2, 25, 25, 2]
         ]
     ]
 
@@ -115,11 +139,18 @@ window.onload = () => {
         ctx.clearRect(0, 0, ANCHOCANVAS, ALTOCANVAS);
 
         // console.log(link);
-
-        drawMap(overworld[0])
+        drawWorld()
         link.pintarJugador()
         link.moverJugador()
 
+    }
+
+    function drawWorld() {
+        drawMap(overworld[indiceMap])
+
+        if (link.x < 0) {
+            indiceMap = 1
+        }
     }
 
     function drawMap(mapa) {
@@ -137,16 +168,22 @@ window.onload = () => {
 
 
                 //AUN TRATANDO DE ENTENDERLO
+
                 ctx.drawImage(imagen,
                     ((mapa[i][j] % 18) * 17) + 1,
                     (Math.floor(mapa[i][j] / 18) * 17) + 1,
                     16,
                     16,
-                    j * 16,
-                    i * 16,
-                    16,
-                    16)
+                    j * 16 * scale,
+                    i * 16 * scale,
+                    16 * scale,
+                    16 * scale)
+                    if (mapa[i][j] != 2) {
+                        ctx.strokeStyle = 'red'
+                        ctx.strokeRect(j * 16 * scale, i * 16 * scale, 16 * scale, 16 * scale);
+                    }
             }
+            
         }
     }
 
@@ -180,7 +217,7 @@ window.onload = () => {
             if (this.y >= ALTOCANVAS - this.tamañoX) {
                 this.y = ALTOCANVAS - this.tamañoX
             }
-            if (this.colisionaConMapa(overworld[0])) {
+            if (this.colisionaConMapa(overworld[indiceMap])) {
                 this.y = oldY; // Revertir movimiento si hay colisión
             }
 
@@ -191,7 +228,7 @@ window.onload = () => {
             if (this.y < 0) {
                 this.y = 0
             }
-            if (this.colisionaConMapa(overworld[0])) {
+            if (this.colisionaConMapa(overworld[indiceMap])) {
                 this.y = oldY; // Revertir movimiento si hay colisión
             }
         }
@@ -201,7 +238,7 @@ window.onload = () => {
             if (this.x >= ANCHOCANVAS - this.tamañoX) {
                 this.x = ANCHOCANVAS - this.tamañoX
             }
-            if (this.colisionaConMapa(overworld[0])) {
+            if (this.colisionaConMapa(overworld[indiceMap])) {
                 this.x = oldX;
             }
         }
@@ -209,9 +246,9 @@ window.onload = () => {
             this.x -= this.velocidad
 
             if (this.x < 0) {
-                this.x = 0
+                drawMap(overworld[1])
             }
-            if (this.colisionaConMapa(overworld[0])) {
+            if (this.colisionaConMapa(overworld[indiceMap])) {
                 this.x = oldX;
             }
         }
