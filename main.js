@@ -1,106 +1,234 @@
-window.onload = () =>{
+window.onload = () => {
 
     const CANVAS = document.getElementById('miCanvas')
     let ctx = CANVAS.getContext('2d')
 
     let id1, animation
-
-    const ANCHO = CANVAS.width
-    const ALTO = CANVAS.height  
-
+    CANVAS.width = 256
+    CANVAS.height = 240 
+    const ANCHOCANVAS = CANVAS.width
+    const ALTOCANVAS = CANVAS.height
+    const scale = 1
+    
     let imagen
 
-    imagen = new Image()
-    imagen.src = "link.png"
 
-
-    let link = new Player(0, 0, true)
-    
-    Player.prototype.image = imagen
+    let link = new Player(ANCHOCANVAS / 2, ALTOCANVAS / 2, true)
 
     let inicial = 0
-	let posicion = 0;
+    let posicion = 0;
+    let yArriba, yAbajo, xDerecha, xIzquierda
 
-    let yArriba,yAbajo,xDerecha,xIzquierda
 
-    function Player(x,y,col){
+    imagen = new Image()
+    imagen.src = "./Imagenes/link.png"
+
+    id1 = setInterval(Draw, 1000 / 60)
+    animation = setInterval(animacionLink, 1000/7)
+    document.addEventListener('keydown', activaMovimiento, false)
+    document.addEventListener('keyup', desactivaMovimiento, false)
+
+    function Player(x, y, col) {
         this.x = x
         this.y = y
-        this.tamañoX = 16  
-        this.tamañoY = 16
+        this.tileSize = 16
 
+        this.tamañoX = 16 * scale
+        this.tamañoY = 16 * scale
+        this.velocidad = 2
 
+        this.isMoving = false
+
+        let offset = 14
         this.animacionLink =
-			[[0, 0], [0, 16],//ABAJO
-			[16, 0], [16, 16],//IZQUIERDA
-			[32, 0], [32, 16],//ARRIBA
-			[48, 0], [48, 16] /*DERECHA*/];
+            [
+                [0, 0], [0, 16 + offset],//ABAJO
+                [16 + offset, 0], [16 + offset, 16 + offset],//IZQUIERDA
+                [90, 0], [90, 16 + offset],//DERECHA
+                [48 + offset, 0], [48 + offset, 16 + offset] //ARRIBA
+            ];
 
-        if(col){
+        if (col) {
             this.colisiona = function (otherobj) {
-				let left = this.x;
-				let right = this.x + (this.tamañoX);
-				let top = this.y;
-				let bottom = this.y + (this.tamañoY);
+                let left = this.x;
+                let right = this.x + (this.tamañoX);
+                let top = this.y;
+                let bottom = this.y + (this.tamañoY);
 
-				let objleft = otherobj.x;
-				let objright = otherobj.x + (otherobj.tamañoX);
-				let objtop = otherobj.y;
-				let objbottom = otherobj.y + (otherobj.tamañoY);
-				let crash = true;
+                let objleft = otherobj.x;
+                let objright = otherobj.x + (otherobj.tamañoX);
+                let objtop = otherobj.y;
+                let objbottom = otherobj.y + (otherobj.tamañoY);
+                let crash = true;
 
-				if ((bottom < objtop) ||
-					(top > objbottom) ||
-					(right < objleft) ||
-					(left > objright)) {
-					crash = false;
-				}
-				return crash;
-			}
+                if ((bottom < objtop) ||
+                    (top > objbottom) ||
+                    (right < objleft) ||
+                    (left > objright)) {
+                    crash = false;
+                }
+                return crash;
+            }
         }
     }
 
+    Player.prototype.imagen = imagen
 
+    let overworld = [
+        //MENU
+        [22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22],
+        [22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22],
+        [22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22],
+        [22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22],
+        //MAPA
+        [25,25,25,25,25,25,25,2,2,96,97,97,97,97,97,97],
+        [25,25,25,25,25,25,25,2,2,96,97,97,97,97,97,97],
+        [25,25,2,2,2,2,2,2,2,96,97,97,97,97,97,97],
+        [25,25,2,2,2,2,25,2,2,96,97,97,97,97,97,97],
+        [2,2,2,2,2,2,2,2,2,96,97,97,97,97,97,97],
+        [2,2,2,2,2,2,25,2,2,114,115,115,115,115,115,115],
+        [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
+        [25,25,2,2,2,2,25,2,2,2,2,2,2,2,2,2],
+        [25,25,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
+        [25,25,25,2,2,2,25,25,25,25,2,2,2,25,25,2],
+        [25,25,25,2,2,2,25,25,25,25,2,2,2,25,25,2],
+    ]
 
-    function Update(){
-        Draw()
-    }
+    imagen = new Image()
+    imagen.src = "./Imagenes/tiles-overworld.png"
 
-    function Draw(){
-        ctx.clearRect(0, 0, 500, 500);
+    console.table(link.animacionLink);
 
-        console.log(link);
+    function Draw() {
+        ctx.clearRect(0, 0, ANCHOCANVAS, ALTOCANVAS);
 
-        ctx.drawImage(link.image, // Imagen completa con todos los comecocos (Sprite)
-        link.animacionLink[0][0],    // Posicion X del sprite donde se encuentra el comecocos que voy a recortar del sprite para dibujar
-        link.animacionLink[0][1],	  // Posicion Y del sprite donde se encuentra el comecocos que voy a recortar del sprite para dibujar
-        link.tamañoX, 		    // Tamaño X del comecocos que voy a recortar para dibujar
-        link.tamañoY,	        // Tamaño Y del comecocos que voy a recortar para dibujar
-        link.x,                // Posicion x de pantalla donde voy a dibujar el comecocos recortado
-        link.y,				   // Posicion y de pantalla donde voy a dibujar el comecocos recortado
-        link.tamañoX * 3,		   // Tamaño X del comecocos que voy a dibujar
-        link.tamañoY * 3);
+        // console.log(link);
+
+        for (let i = 0; i < overworld.length; i++) {
+            for (let j = 0; j < overworld[i].length; j++) {
+                // ctx.drawImage(imagen, // Imagen completa con todos los comecocos (Sprite)
+                // ((overworld[i][j] * 14.5) + 1),    // Posicion X del sprite donde se encuentra el comecocos que voy a recortar del sprite para dibujar
+                // (overworld[i][j] * 0 + 1),	  // Posicion Y del sprite donde se encuentra el comecocos que voy a recortar del sprite para dibujar
+                // 16, 		    // Tamaño X del comecocos que voy a recortar para dibujar
+                // 16,	        // Tamaño Y del comecocos que voy a recortar para dibujar
+                // 16 * j * scale,                // Posicion x de pantalla donde voy a dibujar el comecocos recortado
+                // 16 * i * scale,				   // Posicion y de pantalla donde voy a dibujar el comecocos recortado
+                // 16,		   // Tamaño X del comecocos que voy a dibujar
+                // 16);
+
+                ctx.drawImage(imagen,((overworld[i][j]%18) * 17) + 1,
+                (Math.floor(overworld[i][j]/18) * 17) + 1,
+                16,16,j*16,i*16,16,16)
+
+                
+            }
+        }
+        link.pintarJugador()
+        link.moverJugador()
+
     }
 
     function animacionLink() {
-
-		if (yArriba) {
-			inicial = 9
-		}
-		if (xDerecha) {
-			inicial = 6
-		}
-		if (xIzquierda) {
-			inicial = 3
-		}
-		if (yAbajo) {
-			inicial = 0
-		}
-
-		posicion = inicial + (posicion + 1) % 3
-    
+        if(link.isMoving){
+            posicion = inicial + (posicion + 1) % 2
+        }
     }
 
-    id1 = setInterval(Update,1000/60)
-    animation = setInterval(animacionLink, 1000/10)
+    Player.prototype.pintarJugador = function () {
+        ctx.drawImage(link.imagen, // Imagen completa con todos los comecocos (Sprite)
+            link.animacionLink[posicion][0],    // Posicion X del sprite donde se encuentra el comecocos que voy a recortar del sprite para dibujar
+            link.animacionLink[posicion][1],	  // Posicion Y del sprite donde se encuentra el comecocos que voy a recortar del sprite para dibujar
+            link.tileSize, 		    // Tamaño X del comecocos que voy a recortar para dibujar
+            link.tileSize,	        // Tamaño Y del comecocos que voy a recortar para dibujar
+            link.x,                // Posicion x de pantalla donde voy a dibujar el comecocos recortado
+            link.y,				   // Posicion y de pantalla donde voy a dibujar el comecocos recortado
+            link.tamañoX,		   // Tamaño X del comecocos que voy a dibujar
+            link.tamañoY);
+        // console.log(posicion);
+    }
+
+    Player.prototype.moverJugador = function () {
+
+        if (yAbajo) {
+            this.y += this.velocidad
+            //TEMPORAL
+            if (this.y >= ALTOCANVAS - this.tamañoX) {
+                this.y = ALTOCANVAS - this.tamañoX
+            }
+        }
+        if (yArriba) {
+            this.y -= this.velocidad
+
+            if (this.y < 0) {
+                this.y = 0
+            }
+        }
+        if (xDerecha) {
+            this.x += this.velocidad
+            //TEMPORAL
+            if (this.x >= ANCHOCANVAS - this.tamañoX) {
+                this.x = ANCHOCANVAS - this.tamañoX
+            }
+        }
+        if (xIzquierda) {
+            this.x -= this.velocidad
+
+            if (this.x < 0) {
+                this.x = 0
+            }
+        }
+    }
+    
+    function activaMovimiento(evt) {
+
+        switch (evt.keyCode) {
+            //Izquierda
+            case 37:
+                inicial = 2
+                xIzquierda = true;
+                break;
+            //Arriba
+            case 38:
+                inicial = 6
+                yArriba = true;
+                break;
+            //Derecha
+            case 39:
+                inicial = 4
+                xDerecha = true;
+                break;
+            //Abajo
+            case 40:
+                inicial = 0
+                yAbajo = true;
+                break;
+
+        }
+
+        link.isMoving = true
+    }
+
+    function desactivaMovimiento(evt) {
+        switch (evt.keyCode) {
+            //Izquierda
+            case 37:
+                xIzquierda = false;
+                break;
+            //Arriba
+            case 38:
+                yArriba = false;
+                break;
+            // Derecha
+            case 39:
+                xDerecha = false;
+                break;
+            //Abajo
+            case 40:
+                yAbajo = false;
+                break;
+
+        }
+
+        link.isMoving = xIzquierda || yArriba || xDerecha || yAbajo;
+    }
 }

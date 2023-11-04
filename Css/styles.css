@@ -1,6 +1,13 @@
+*{
+    overflow: hidden;
+}
+
 body{
-    background-color: black;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
 }
-canvas{
+/* canvas{
     background-color: grey;
-}
+} */
