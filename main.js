@@ -4,7 +4,7 @@ window.onload = () => {
     let ctx = CANVAS.getContext('2d')
 
     let id1, animation
-    const scale = 3
+    const scale = 1 //3
     CANVAS.width = 256 * scale
     CANVAS.height = 240 * scale
     const ANCHOCANVAS = CANVAS.width
@@ -14,7 +14,8 @@ window.onload = () => {
     let imagen
 
 
-    let link = new Player(ANCHOCANVAS / 2, ALTOCANVAS / 2, true)
+    // let link = new Player(ANCHOCANVAS / 2, ALTOCANVAS / 2, true)
+    let link = new Player(90, 125, true)
 
     let inicial = 0
     let posicion = 0;
@@ -38,7 +39,7 @@ window.onload = () => {
 
         this.tamañoX = 16 * scale
         this.tamañoY = 16 * scale
-        this.velocidad = 7
+        this.velocidad = 2 * scale
 
         this.isMoving = false
 
@@ -75,21 +76,44 @@ window.onload = () => {
         }
     }
 
+    const arrayCaminables = [2,97];
+
     Player.prototype.imagen = imagen
 
 
     //NO ES MIA, ES DE CHATGPT
-    Player.prototype.colisionaConMapa = function (mapa) {
+    Player.prototype.colisionaConMapa = function (pantalla) {
         // Calcula las coordenadas de los tiles que el jugador está tocando
-        const tileX = Math.floor((this.x + this.tamañoX / 2) / this.tamañoX);
-        const tileY = Math.floor((this.y + this.tamañoY / 2) / this.tamañoY);
+        const tileX = Math.floor((this.x + this.tamañoX/2) / this.tamañoX);
+        const tileY = Math.floor((this.y + this.tamañoY-8 / 2) / this.tamañoY);
+
+
 
         // Verifica la colisión con el tile en el que se encuentra el jugador
-        const tileValue = mapa[tileY][tileX];
-        return tileValue !== 2;
+        const tileValue = pantalla[tileY][tileX];
+        return !arrayCaminables.includes(tileValue);
     };
 
     let overworld = [
+        [
+            //MENU
+            [22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22],
+            [22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22],
+            [22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22],
+            [22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22],
+            //MAPA
+            [25, 25, 25, 25, 25, 25, 25, 2, 2, 96, 97, 97, 97, 97, 97, 97],
+            [25, 25, 25, 25, 25, 25, 25, 2, 2, 96, 97, 97, 97, 97, 97, 97],
+            [25, 25, 2, 2, 2, 2, 2, 2, 2, 96, 97, 97, 97, 97, 97, 97],
+            [25, 25, 2, 2, 2, 2, 2, 2, 2, 96, 97, 97, 97, 97, 97, 97],
+            [2, 2, 2, 2, 2, 2, 2, 2, 2, 96, 97, 97, 97, 97, 97, 97],
+            [2, 2, 2, 2, 2, 2, 2, 2, 2, 114, 115, 115, 115, 115, 115, 115],
+            [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+            [25, 25, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+            [25, 25, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+            [25, 25, 25, 2, 2, 2, 25, 25, 25, 25, 2, 2, 2, 25, 25, 2],
+            [25, 25, 25, 2, 2, 2, 25, 25, 25, 25, 2, 2, 2, 25, 25, 2]
+        ],
         [
             //MENU
             [22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22],
@@ -178,7 +202,7 @@ window.onload = () => {
                     i * 16 * scale,
                     16 * scale,
                     16 * scale)
-                    if (mapa[i][j] != 2) {
+                    if (!arrayCaminables.includes(mapa[i][j])) {
                         ctx.strokeStyle = 'red'
                         ctx.strokeRect(j * 16 * scale, i * 16 * scale, 16 * scale, 16 * scale);
                     }
