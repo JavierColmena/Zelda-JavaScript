@@ -1,5 +1,5 @@
 window.onload = () => {
-
+    document.body.style.zoom = "220%"
     const CANVAS = document.getElementById('miCanvas')
     let ctx = CANVAS.getContext('2d')
 
