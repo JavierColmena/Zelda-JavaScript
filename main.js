@@ -1,5 +1,5 @@
 window.onload = () => {
-    document.body.style.zoom = "220%"
+    document.body.style.zoom = "300%"
     const CANVAS = document.getElementById('miCanvas')
     let ctx = CANVAS.getContext('2d')
 
@@ -170,7 +170,9 @@ window.onload = () => {
 
     function drawWorld() {
         drawMap(overworld[indiceMap])
-
+        if(link.y < (16 * 4) - 8){
+            indiceMap = 0
+        }
         if (link.x < 0) {
             indiceMap = 1
         }
@@ -201,10 +203,6 @@ window.onload = () => {
                     i * 16 * scale,
                     16 * scale,
                     16 * scale)
-                // if (!arrayCaminables.includes(mapa[i][j])) {
-                //     ctx.strokeStyle = 'red'
-                //     ctx.strokeRect(j * 16 * scale, i * 16 * scale, 16 * scale, 16 * scale);
-                // }
             }
 
         }
@@ -215,14 +213,15 @@ window.onload = () => {
             posicion = inicial + (posicion + 1) % 2
         }
     }
+
     //NO ES MIA
     function collision(x, y, map) {
         for (let i = 0; i < map.length; i++) {
             for (let j = 0; j < map[i].length; j++) {
                 if (map[i][j] != 2 && map[i][j] != 28) {
-                    if (x <= j * 16 + 16 &&
+                    if (x <= j * 16 + 12 &&
                         x + 12 >= j * 16 &&
-                        y + 10 <= i * 16 + 16 &&
+                        y + 1 <= i * 16 + 16 &&
                         y + 16 >= i * 16) {
                         return true;
                     }
@@ -247,8 +246,6 @@ window.onload = () => {
 
     Player.prototype.moverJugador = function () {
 
-        const oldX = this.x;
-        const oldY = this.y;
 
         if (yAbajo && !collision(link.x, link.y + link.velocidad, overworld[indiceMap])) {
             this.y += this.velocidad
