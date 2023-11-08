@@ -9,7 +9,7 @@ window.onload = () => {
     CANVAS.height = 240 * scale
     const ANCHOCANVAS = CANVAS.width
     const ALTOCANVAS = CANVAS.height
-    
+
     let github = 'hola'
 
     let imagen
@@ -77,7 +77,7 @@ window.onload = () => {
         }
     }
 
-    const arrayCaminables = [2,97];
+    const arrayCaminables = [2, 97];
 
     Player.prototype.imagen = imagen
 
@@ -85,8 +85,8 @@ window.onload = () => {
     //NO ES MIA, ES DE CHATGPT
     Player.prototype.colisionaConMapa = function (pantalla) {
         // Calcula las coordenadas de los tiles que el jugador está tocando
-        const tileX = Math.floor((this.x + this.tamañoX/2) / this.tamañoX);
-        const tileY = Math.floor((this.y + this.tamañoY-8 / 2) / this.tamañoY);
+        const tileX = Math.floor((this.x + this.tamañoX / 2) / this.tamañoX);
+        const tileY = Math.floor((this.y + this.tamañoY - 8 / 2) / this.tamañoY);
 
         // Verifica la colisión con el tile en el que se encuentra el jugador
         const tileValue = pantalla[tileY][tileX];
@@ -201,12 +201,12 @@ window.onload = () => {
                     i * 16 * scale,
                     16 * scale,
                     16 * scale)
-                    if (!arrayCaminables.includes(mapa[i][j])) {
-                        ctx.strokeStyle = 'red'
-                        ctx.strokeRect(j * 16 * scale, i * 16 * scale, 16 * scale, 16 * scale);
-                    }
+                // if (!arrayCaminables.includes(mapa[i][j])) {
+                //     ctx.strokeStyle = 'red'
+                //     ctx.strokeRect(j * 16 * scale, i * 16 * scale, 16 * scale, 16 * scale);
+                // }
             }
-            
+
         }
     }
 
@@ -214,6 +214,22 @@ window.onload = () => {
         if (link.isMoving) {
             posicion = inicial + (posicion + 1) % 2
         }
+    }
+    //NO ES MIA
+    function collision(x, y, map) {
+        for (let i = 0; i < map.length; i++) {
+            for (let j = 0; j < map[i].length; j++) {
+                if (map[i][j] != 2 && map[i][j] != 28) {
+                    if (x <= j * 16 + 16 &&
+                        x + 12 >= j * 16 &&
+                        y + 10 <= i * 16 + 16 &&
+                        y + 16 >= i * 16) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     Player.prototype.pintarJugador = function () {
@@ -234,45 +250,33 @@ window.onload = () => {
         const oldX = this.x;
         const oldY = this.y;
 
-        if (yAbajo) {
+        if (yAbajo && !collision(link.x, link.y + link.velocidad, overworld[indiceMap])) {
             this.y += this.velocidad
             // //TEMPORAL
             if (this.y >= ALTOCANVAS - this.tamañoX) {
                 this.y = ALTOCANVAS - this.tamañoX
             }
-            if (this.colisionaConMapa(overworld[indiceMap])) {
-                this.y = oldY; // Revertir movimiento si hay colisión
-            }
 
         }
-        if (yArriba) {
+        if (yArriba && !collision(link.x, link.y - link.velocidad, overworld[indiceMap])) {
             this.y -= this.velocidad
 
             if (this.y < 0) {
                 this.y = 0
             }
-            if (this.colisionaConMapa(overworld[indiceMap])) {
-                this.y = oldY; // Revertir movimiento si hay colisión
-            }
         }
-        if (xDerecha) {
+        if (xDerecha && !collision(link.x + link.velocidad, link.y, overworld[indiceMap])) {
             this.x += this.velocidad
             // TEMPORAL
             if (this.x >= ANCHOCANVAS - this.tamañoX) {
                 this.x = ANCHOCANVAS - this.tamañoX
             }
-            if (this.colisionaConMapa(overworld[indiceMap])) {
-                this.x = oldX;
-            }
         }
-        if (xIzquierda) {
+        if (xIzquierda && !collision(link.x - link.velocidad, link.y, overworld[indiceMap])) {
             this.x -= this.velocidad
 
             if (this.x < 0) {
                 drawMap(overworld[1])
-            }
-            if (this.colisionaConMapa(overworld[indiceMap])) {
-                this.x = oldX;
             }
         }
     }
