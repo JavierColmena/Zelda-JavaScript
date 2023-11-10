@@ -44,15 +44,29 @@ window.onload = () => {
 
         this.isMoving = false
 
+        this.canAtack = false;
+        this.isAtacking = false;
+
+
         let offset = 14
         this.animacionLink =
             [
+                //[X,Y]
                 [0, 0], [0, 16 + offset],//ABAJO
                 [16 + offset, 0], [16 + offset, 16 + offset],//IZQUIERDA
                 [90, 0], [90, 16 + offset],//DERECHA
-                [48 + offset, 0], [48 + offset, 16 + offset] //ARRIBA
+                [48 + offset, 0], [48 + offset, 16 + offset] /*ARRIBA*/,
+
+                //LINK ATACAR
+
+                [0, 60], [0, 84],//ABAJO
+                [16 + offset, 60], [16 + offset, 84],//IZQUIERDA
+                [90, 60], [90, 84],//DERECHA
+                [48 + offset, 60], [48 + offset, 84] /*ARRIBA*/,
+
             ];
 
+        //COLISIONES PARA ENEMIGOS
         if (col) {
             this.colisiona = function (otherobj) {
                 let left = this.x;
@@ -77,7 +91,6 @@ window.onload = () => {
         }
     }
 
-    const arrayCaminables = [2, 97];
 
     Player.prototype.imagen = imagen
 
@@ -131,25 +144,6 @@ window.onload = () => {
             [25, 25, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
             [25, 25, 25, 2, 2, 2, 25, 25, 25, 25, 2, 2, 2, 25, 25, 2],
             [25, 25, 25, 2, 2, 2, 25, 25, 25, 25, 2, 2, 2, 25, 25, 2]
-        ],
-        [
-            //MENU
-            [22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22],
-            [22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22],
-            [22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22],
-            [22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22],
-            //MAPA
-            [25, 25, 25, 25, 25, 25, 25, 2, 2, 96, 97, 97, 97, 97, 97, 97],
-            [25, 25, 25, 25, 25, 25, 25, 2, 2, 96, 97, 97, 97, 97, 97, 97],
-            [25, 25, 2, 2, 2, 2, 2, 2, 2, 96, 97, 97, 97, 97, 97, 97],
-            [25, 25, 2, 2, 2, 2, 25, 2, 2, 96, 97, 97, 97, 97, 97, 97],
-            [2, 2, 2, 25, 25, 2, 2, 2, 2, 96, 97, 97, 97, 97, 97, 97],
-            [2, 2, 2, 25, 25, 2, 25, 2, 2, 114, 115, 115, 115, 115, 115, 115],
-            [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
-            [25, 25, 2, 2, 2, 2, 25, 2, 2, 2, 2, 2, 2, 2, 2, 2],
-            [25, 25, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
-            [25, 25, 25, 2, 2, 2, 25, 25, 25, 25, 2, 2, 2, 25, 25, 2],
-            [25, 25, 25, 2, 2, 2, 25, 25, 25, 25, 2, 2, 2, 25, 25, 2]
         ]
     ]
 
@@ -162,18 +156,59 @@ window.onload = () => {
         ctx.clearRect(0, 0, ANCHOCANVAS, ALTOCANVAS);
 
         // console.log(link);
+        //MAPA
         drawWorld()
+        //JUGADOR
         link.pintarJugador()
         link.moverJugador()
+        //HUD
+        drawHUD()
+
+    }
+
+    function drawHUD(){
+        let hud 
+        hud = new Image()
+        hud.src = "./Imagenes/hud.png"
+        
+        ctx.fillRect(0,0,256,65)
+        ctx.fillStyle = 'black'
+        //HUD PRINCIPAL 256 x 56
+        ctx.drawImage(hud, // Imagen completa con todos los comecocos (Sprite)
+            258,    // Posicion X del sprite donde se encuentra el comecocos que voy a recortar del sprite para dibujar
+            11,	  // Posicion Y del sprite donde se encuentra el comecocos que voy a recortar del sprite para dibujar
+            256, 		    // Tamaño X del comecocos que voy a recortar para dibujar
+            56,	        // Tamaño Y del comecocos que voy a recortar para dibujar
+            0,                // Posicion x de pantalla donde voy a dibujar el comecocos recortado
+            0,
+            256,
+            56);
+        
+        //MAPA 64 x 40
+        ctx.drawImage(hud, // Imagen completa con todos los comecocos (Sprite)
+        519,    // Posicion X del sprite donde se encuentra el comecocos que voy a recortar del sprite para dibujar
+        1,	  // Posicion Y del sprite donde se encuentra el comecocos que voy a recortar del sprite para dibujar
+        64, 		    // Tamaño X del comecocos que voy a recortar para dibujar
+        40,	        // Tamaño Y del comecocos que voy a recortar para dibujar
+        16,                // Posicion x de pantalla donde voy a dibujar el comecocos recortado
+        8,
+        64,
+        40);
+
+            
+
 
     }
 
     function drawWorld() {
+        ctx.save()
+        ctx.globalAlpha = 1;
         drawMap(overworld[indiceMap])
-        if(link.y < (16 * 4) - 8){
+        ctx.restore()
+        if (link.y < (16 * 4) - 8) {
             indiceMap = 0
         }
-        if (link.x < 0) {
+        if (link.x <= 0) {
             indiceMap = 1
         }
     }
@@ -221,8 +256,8 @@ window.onload = () => {
                 if (map[i][j] != 2 && map[i][j] != 28) {
                     if (x <= j * 16 + 12 &&
                         x + 12 >= j * 16 &&
-                        y + 1 <= i * 16 + 16 &&
-                        y + 16 >= i * 16) {
+                        y + 10 <= i * 16 + 16 &&
+                        y + 14 >= i * 16) {
                         return true;
                     }
                 }
@@ -273,8 +308,9 @@ window.onload = () => {
             this.x -= this.velocidad
 
             if (this.x < 0) {
-                drawMap(overworld[1])
-            }
+                this.x = 0
+            }            
+
         }
     }
 
@@ -301,6 +337,10 @@ window.onload = () => {
                 inicial = 0
                 yAbajo = true;
                 break;
+            //ATACANDO
+            case 88:
+                link.isAtacking = true;
+                break;
 
         }
 
@@ -324,6 +364,11 @@ window.onload = () => {
             //Abajo
             case 40:
                 yAbajo = false;
+                break;
+
+            //ATACAR
+            case 88:
+                link.isAtacking = false;
                 break;
 
         }
