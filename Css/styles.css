@@ -3,6 +3,6 @@ body{
     align-items: center;
     justify-content: center;
 }
-/* canvas{
-    background-color: grey;
-} */
+canvas{
+    image-rendering: pixelated;
+}
