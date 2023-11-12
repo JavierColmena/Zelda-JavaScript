@@ -25,6 +25,7 @@ window.onload = () => {
 
     let indiceMap = 0
 
+
     imagen = new Image()
     imagen.src = "./Imagenes/link.png"
 
@@ -46,6 +47,7 @@ window.onload = () => {
 
         this.canAtack = false;
         this.isAtacking = false;
+        this.atCooldown = 0
 
         this.ubicacion = "overworld"
 
@@ -142,6 +144,7 @@ window.onload = () => {
         //MAPA
         drawWorld()
         //JUGADOR
+        link.atacar()
         link.pintarJugador()
         link.moverJugador()
         //HUD
@@ -149,12 +152,12 @@ window.onload = () => {
 
     }
 
-    function drawHUD(){
-        let hud 
+    function drawHUD() {
+        let hud
         hud = new Image()
         hud.src = "./Imagenes/hud.png"
-        
-        ctx.fillRect(0,0,256,65)
+
+        ctx.fillRect(0, 0, 256, 65)
         ctx.fillStyle = 'black'
         //HUD PRINCIPAL 256 x 56
         ctx.drawImage(hud, // Imagen completa con todos los comecocos (Sprite)
@@ -166,17 +169,17 @@ window.onload = () => {
             0,
             256,
             56);
-        
+
         //MAPA 64 x 40
         ctx.drawImage(hud, // Imagen completa con todos los comecocos (Sprite)
-        519,    // Posicion X del sprite donde se encuentra el comecocos que voy a recortar del sprite para dibujar
-        1,	  // Posicion Y del sprite donde se encuentra el comecocos que voy a recortar del sprite para dibujar
-        64, 		    // Tamaño X del comecocos que voy a recortar para dibujar
-        40,	        // Tamaño Y del comecocos que voy a recortar para dibujar
-        16,                // Posicion x de pantalla donde voy a dibujar el comecocos recortado
-        8,
-        64,
-        40);
+            519,    // Posicion X del sprite donde se encuentra el comecocos que voy a recortar del sprite para dibujar
+            1,	  // Posicion Y del sprite donde se encuentra el comecocos que voy a recortar del sprite para dibujar
+            64, 		    // Tamaño X del comecocos que voy a recortar para dibujar
+            40,	        // Tamaño Y del comecocos que voy a recortar para dibujar
+            16,                // Posicion x de pantalla donde voy a dibujar el comecocos recortado
+            8,
+            64,
+            40);
 
 
     }
@@ -250,18 +253,35 @@ window.onload = () => {
         }
         return false;
     }
-
+    let tamañoEspada = 0
     Player.prototype.pintarJugador = function () {
         ctx.drawImage(link.imagen, // Imagen completa con todos los comecocos (Sprite)
             link.animacionLink[posicion][0],    // Posicion X del sprite donde se encuentra el comecocos que voy a recortar del sprite para dibujar
             link.animacionLink[posicion][1],	  // Posicion Y del sprite donde se encuentra el comecocos que voy a recortar del sprite para dibujar
             link.tileSize, 		    // Tamaño X del comecocos que voy a recortar para dibujar
-            link.tileSize,	        // Tamaño Y del comecocos que voy a recortar para dibujar
+            link.tileSize + tamañoEspada,	        // Tamaño Y del comecocos que voy a recortar para dibujar
             link.x,                // Posicion x de pantalla donde voy a dibujar el comecocos recortado
             link.y,				   // Posicion y de pantalla donde voy a dibujar el comecocos recortado
             link.tamañoX,		   // Tamaño X del comecocos que voy a dibujar
-            link.tamañoY);
+            link.tamañoY + tamañoEspada);
         // console.log(posicion);
+    }
+
+    Player.prototype.atacar = function () {
+        //Atacar cooldown
+        console.log(posicion);
+
+        if (link.isAtacking && (posicion === 0 || posicion === 1)) {
+            inicial = 8
+            
+        }
+        if(posicion === 9){
+            tamañoEspada = 13
+        }
+        else if(posicion === 8){
+            tamañoEspada = 0
+        }
+
     }
 
     Player.prototype.moverJugador = function () {
@@ -278,7 +298,7 @@ window.onload = () => {
         if (yArriba && !collision(link.x, link.y - link.velocidad, overworld[indiceMap])) {
             this.y -= this.velocidad
 
-            if(this.y < 0){
+            if (this.y < 0) {
                 this.y = 0
             }
 
@@ -293,9 +313,9 @@ window.onload = () => {
         if (xIzquierda && !collision(link.x - link.velocidad, link.y, overworld[indiceMap])) {
             this.x -= this.velocidad
 
-            if(this.x < 0){
+            if (this.x < 0) {
                 this.x = 0
-            }      
+            }
 
         }
     }
@@ -323,7 +343,7 @@ window.onload = () => {
                 inicial = 0
                 yAbajo = true;
                 break;
-            //ATACANDO
+            //ATACAR X
             case 88:
                 link.isAtacking = true;
                 break;
@@ -352,7 +372,7 @@ window.onload = () => {
                 yAbajo = false;
                 break;
 
-            //ATACAR
+            //ATACAR X
             case 88:
                 link.isAtacking = false;
                 break;
