@@ -1,5 +1,5 @@
 window.onload = () => {
-    document.body.style.zoom = "300%"
+    document.body.style.zoom = "200%"
     const CANVAS = document.getElementById('miCanvas')
     let ctx = CANVAS.getContext('2d')
 
@@ -46,6 +46,8 @@ window.onload = () => {
 
         this.canAtack = false;
         this.isAtacking = false;
+
+        this.ubicacion = "overworld"
 
 
         let offset = 14
@@ -125,25 +127,6 @@ window.onload = () => {
             [25, 25, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
             [25, 25, 25, 2, 2, 2, 25, 25, 25, 25, 2, 2, 2, 25, 25, 2],
             [25, 25, 25, 2, 2, 2, 25, 25, 25, 25, 2, 2, 2, 25, 25, 2]
-        ],
-        [
-            //MENU
-            [22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22],
-            [22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22],
-            [22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22],
-            [22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22],
-            //MAPA
-            [25, 25, 25, 25, 25, 25, 25, 2, 2, 96, 97, 97, 97, 97, 97, 97],
-            [25, 25, 25, 25, 25, 25, 25, 2, 2, 96, 97, 97, 97, 97, 97, 97],
-            [25, 25, 2, 2, 2, 2, 2, 2, 2, 96, 97, 97, 97, 97, 97, 97],
-            [25, 25, 2, 2, 2, 2, 25, 2, 2, 96, 97, 97, 97, 97, 97, 97],
-            [2, 2, 2, 2, 2, 2, 2, 2, 2, 96, 97, 97, 97, 97, 97, 97],
-            [2, 2, 2, 2, 2, 2, 25, 2, 2, 114, 115, 115, 115, 115, 115, 115],
-            [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
-            [25, 25, 2, 2, 2, 2, 25, 2, 2, 2, 2, 2, 2, 2, 2, 2],
-            [25, 25, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
-            [25, 25, 25, 2, 2, 2, 25, 25, 25, 25, 2, 2, 2, 25, 25, 2],
-            [25, 25, 25, 2, 2, 2, 25, 25, 25, 25, 2, 2, 2, 25, 25, 2]
         ]
     ]
 
@@ -195,22 +178,27 @@ window.onload = () => {
         64,
         40);
 
-            
-
 
     }
+
+    //MENÚ & INVENTARIO
+    // function drawMenu(){
+    //     if(link.ubicacion === "overworld"){
+    //         drawImage()
+    //     }
+    //     if(link.ubicacion === "dungeon"){
+
+    //     }
+    // }
 
     function drawWorld() {
         ctx.save()
         ctx.globalAlpha = 1;
         drawMap(overworld[indiceMap])
         ctx.restore()
-        if (link.y < (16 * 4) - 8) {
-            indiceMap = 0
-        }
-        if (link.x <= 0) {
-            indiceMap = 1
-        }
+        // if (link.y < (16 * 4) - 8) {
+        //     indiceMap = 0
+        // }
     }
 
     function drawMap(mapa) {
@@ -225,9 +213,6 @@ window.onload = () => {
                 // 16 * i * scale,				   // Posicion y de pantalla donde voy a dibujar el comecocos recortado
                 // 16,		   // Tamaño X del comecocos que voy a dibujar
                 // 16);
-
-
-                //AUN TRATANDO DE ENTENDERLO
 
                 ctx.drawImage(imagen,
                     ((mapa[i][j] % 18) * 17) + 1,
@@ -293,9 +278,10 @@ window.onload = () => {
         if (yArriba && !collision(link.x, link.y - link.velocidad, overworld[indiceMap])) {
             this.y -= this.velocidad
 
-            if (this.y < 0) {
+            if(this.y < 0){
                 this.y = 0
             }
+
         }
         if (xDerecha && !collision(link.x + link.velocidad, link.y, overworld[indiceMap])) {
             this.x += this.velocidad
@@ -307,9 +293,9 @@ window.onload = () => {
         if (xIzquierda && !collision(link.x - link.velocidad, link.y, overworld[indiceMap])) {
             this.x -= this.velocidad
 
-            if (this.x < 0) {
+            if(this.x < 0){
                 this.x = 0
-            }            
+            }      
 
         }
     }
