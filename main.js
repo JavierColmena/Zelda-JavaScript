@@ -269,18 +269,25 @@ window.onload = () => {
 
     Player.prototype.atacar = function () {
         //Atacar cooldown
-        console.log(posicion);
+        let cooldown = 1000
+        let timer = 0
+        timer++
+        // console.log(posicion);
+        if(!(timer >= cooldown)){
 
-        if (link.isAtacking && (posicion === 0 || posicion === 1)) {
-            inicial = 8
-            
+            if(posicion === 9){
+                tamañoEspada = 13
+            }
+            else{
+                tamañoEspada = 0
+            }
+    
+            if (link.isAtacking && (posicion === 0 || posicion === 1)) {
+                inicial = 8
+            }
         }
-        if(posicion === 9){
-            tamañoEspada = 13
-        }
-        else if(posicion === 8){
-            tamañoEspada = 0
-        }
+
+
 
     }
 
