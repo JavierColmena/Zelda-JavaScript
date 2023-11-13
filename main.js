@@ -32,7 +32,7 @@ window.onload = () => {
     imagen.src = "./Imagenes/link.png"
 
     id1 = setInterval(Draw, 1000 / 60)
-    animation = setInterval(animacionLink, 1000 / 15)
+    animation = setInterval(animacionLink, 1000 / 10)
     document.addEventListener('keydown', activaMovimiento, false)
     document.addEventListener('keyup', desactivaMovimiento, false)
 
@@ -48,7 +48,7 @@ window.onload = () => {
         this.canMove = true
         this.isMoving = false
 
-        this.canAtack = false;
+        this.canAtack = true;
         this.isAtacking = false;
 
         this.ubicacion = "overworld"
@@ -290,7 +290,7 @@ window.onload = () => {
     Player.prototype.atacar = function () {
         //ABAJO - 0 IZQUIERDA - 2 ARRIBA - 4 DERECHA - 6
 
-        if (this.isAtacking) {
+        if (this.canAtack && this.isAtacking) {
             this.estado = 'atacando'
             this.canMove = false
             if(inicial === 0){
