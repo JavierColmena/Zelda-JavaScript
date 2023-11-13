@@ -15,6 +15,11 @@ window.onload = () => {
     let imagen
 
     // let link = new Player(ANCHOCANVAS / 2, ALTOCANVAS / 2, true)
+    let tamañoEspadaY = 0
+    let tamañoEspadaYY = 14
+    let tamañoEspadaXX = 10
+    let tamañoEspadaX = 0
+    
     let link = new Player(90, 125, true)
 
     let inicial = 0
@@ -25,7 +30,7 @@ window.onload = () => {
 
     let indiceMap = 0
 
-    let tamañoEspada = 0
+
 
 
     imagen = new Image()
@@ -68,34 +73,39 @@ window.onload = () => {
         this.atacarAnim = [
             //LINK ATACAR
             [0, 84],//ABAJO
-            [16 + offset, 84],//IZQUIERDA
-            [90, 84],//DERECHA
-            [48 + offset, 84] /*ARRIBA*/
+            [24, 90],//IZQUIERDA
+            [84, 90],//DERECHA
+            [60, 84] /*ARRIBA*/
         ]
 
+        this.vida = 3
+        this.rupias = 0
+        this.llaves = 0
+        this.bombas = 0
+
         //COLISIONES PARA ENEMIGOS
-        if (col) {
-            this.colisiona = function (otherobj) {
-                let left = this.x;
-                let right = this.x + (this.tamañoX);
-                let top = this.y;
-                let bottom = this.y + (this.tamañoY);
+        // if (col) {
+        //     this.colisiona = function (otherobj) {
+        //         let left = this.x;
+        //         let right = this.x + (this.tamañoX);
+        //         let top = this.y;
+        //         let bottom = this.y + (this.tamañoY);
 
-                let objleft = otherobj.x;
-                let objright = otherobj.x + (otherobj.tamañoX);
-                let objtop = otherobj.y;
-                let objbottom = otherobj.y + (otherobj.tamañoY);
-                let crash = true;
+        //         let objleft = otherobj.x;
+        //         let objright = otherobj.x + (otherobj.tamañoX);
+        //         let objtop = otherobj.y;
+        //         let objbottom = otherobj.y + (otherobj.tamañoY);
+        //         let crash = true;
 
-                if ((bottom < objtop) ||
-                    (top > objbottom) ||
-                    (right < objleft) ||
-                    (left > objright)) {
-                    crash = false;
-                }
-                return crash;
-            }
-        }
+        //         if ((bottom < objtop) ||
+        //             (top > objbottom) ||
+        //             (right < objleft) ||
+        //             (left > objright)) {
+        //             crash = false;
+        //         }
+        //         return crash;
+        //     }
+        // }
     }
 
 
@@ -123,8 +133,8 @@ window.onload = () => {
             //MAPA
             [25, 25, 25, 25, 25, 25, 25, 2, 2, 96, 97, 97, 97, 97, 97, 97],
             [25, 25, 25, 25, 25, 25, 25, 2, 2, 96, 97, 97, 97, 97, 97, 97],
-            [25, 25, 2, 2, 2, 2, 2, 2, 2, 96, 97, 97, 97, 97, 97, 97],
-            [25, 25, 2, 2, 2, 2, 2, 2, 2, 96, 97, 97, 97, 97, 97, 97],
+            [25, 25, 9, 10, 11, 2, 2, 2, 2, 96, 97, 97, 97, 97, 97, 97],
+            [25, 25, 27, 28, 29, 2, 2, 2, 2, 96, 97, 97, 97, 97, 97, 97],
             [2, 2, 2, 2, 2, 2, 2, 2, 2, 96, 97, 97, 97, 97, 97, 97],
             [2, 2, 2, 2, 2, 2, 2, 2, 2, 114, 115, 115, 115, 115, 115, 115],
             [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
@@ -241,11 +251,19 @@ window.onload = () => {
         }
     }
 
-    //NO ES MIA
     function collision(x, y, map) {
         for (let i = 0; i < map.length; i++) {
             for (let j = 0; j < map[i].length; j++) {
-                if (map[i][j] != 2 && map[i][j] != 28) {
+                if (map[i][j] === 28) {
+                    if (x <= j * 16 + 12 &&
+                        x + 12 >= j * 16 &&
+                        y + 10 <= i * 16 + 16 &&
+                        y + 14 >= i * 16) {
+
+                        console.log('entrada');
+                    }
+                }
+                else if (map[i][j] != 2 && map[i][j] != 28) {
                     if (x <= j * 16 + 12 &&
                         x + 12 >= j * 16 &&
                         y + 10 <= i * 16 + 16 &&
@@ -266,55 +284,73 @@ window.onload = () => {
                 link.idle[posicion][0],    // Posicion X del sprite donde se encuentra el comecocos que voy a recortar del sprite para dibujar
                 link.idle[posicion][1],	  // Posicion Y del sprite donde se encuentra el comecocos que voy a recortar del sprite para dibujar
                 link.tileSize, 		    // Tamaño X del comecocos que voy a recortar para dibujar
-                link.tileSize + tamañoEspada,	        // Tamaño Y del comecocos que voy a recortar para dibujar
+                link.tileSize,	        // Tamaño Y del comecocos que voy a recortar para dibujar
                 link.x,                // Posicion x de pantalla donde voy a dibujar el comecocos recortado
                 link.y,				   // Posicion y de pantalla donde voy a dibujar el comecocos recortado
                 link.tamañoX,		   // Tamaño X del comecocos que voy a dibujar
-                link.tamañoY + tamañoEspada);
+                link.tamañoY);
         }
         else if (link.estado === 'atacando') {
             ctx.drawImage(link.imagen, // Imagen completa con todos los comecocos (Sprite)
                 link.atacarAnim[posicionAtaque][0],    // Posicion X del sprite donde se encuentra el comecocos que voy a recortar del sprite para dibujar
                 link.atacarAnim[posicionAtaque][1],	  // Posicion Y del sprite donde se encuentra el comecocos que voy a recortar del sprite para dibujar
-                link.tileSize, 		    // Tamaño X del comecocos que voy a recortar para dibujar
-                link.tileSize + tamañoEspada,	        // Tamaño Y del comecocos que voy a recortar para dibujar
-                link.x,                // Posicion x de pantalla donde voy a dibujar el comecocos recortado
-                link.y,				   // Posicion y de pantalla donde voy a dibujar el comecocos recortado
-                link.tamañoX,		   // Tamaño X del comecocos que voy a dibujar
-                link.tamañoY + tamañoEspada);
+                link.tileSize + tamañoEspadaX, 		    // Tamaño X del comecocos que voy a recortar para dibujar
+                link.tileSize + tamañoEspadaY,	        // Tamaño Y del comecocos que voy a recortar para dibujar
+                link.x - tamañoEspadaXX,                // Posicion x de pantalla donde voy a dibujar el comecocos recortado
+                link.y - tamañoEspadaYY,			   // Posicion y de pantalla donde voy a dibujar el comecocos recortado
+                link.tamañoX + tamañoEspadaX,		   // Tamaño X del comecocos que voy a dibujar
+                link.tamañoY + tamañoEspadaY);
         }
 
         // console.log(posicion);
     }
 
     Player.prototype.atacar = function () {
-        //ABAJO - 0 IZQUIERDA - 2 ARRIBA - 4 DERECHA - 6
 
         if (this.canAtack && this.isAtacking) {
             this.estado = 'atacando'
             this.canMove = false
-            if(inicial === 0){
-                tamañoEspada = 13
+            
+            //ABAJO 0
+            if (inicial === 0) {
+                tamañoEspadaY = 13
+                tamañoEspadaX = 0
+                tamañoEspadaXX = 0
+                tamañoEspadaYY = 0
+
                 posicionAtaque = 0
             }
-            else if(inicial === 2){
-                tamañoEspada = 0
+            //IZQUIERDA 2
+            else if (inicial === 2) {
+                tamañoEspadaX = 13
+                tamañoEspadaXX = 10
+                tamañoEspadaY = 0
+                tamañoEspadaYY = 0
+
                 posicionAtaque = 1
             }
-            else if(inicial === 4){
-                tamañoEspada = 13
+            //DERECHA 4
+            else if (inicial === 4) {
+                tamañoEspadaY = 0
+                tamañoEspadaX = 13
+                tamañoEspadaXX = 0
+                tamañoEspadaYY = 0
                 posicionAtaque = 2
             }
-            else if(inicial === 6){
-                tamañoEspada = 0
+            //ARRIBA 6
+            else if (inicial === 6) {
+                tamañoEspadaX = 0
+                tamañoEspadaXX = 0
+                tamañoEspadaYY = 14
+                tamañoEspadaY = 13
                 posicionAtaque = 3
             }
-            
+
 
             setTimeout(() => {
                 this.estado = 'idle'
                 this.canMove = true
-
+                this.isAtacking = false
             }, 500 / 2);
         }
 
@@ -364,21 +400,29 @@ window.onload = () => {
             case 37:
                 inicial = 2
                 xIzquierda = true;
+                link.isMoving = true
+
                 break;
             //Arriba
             case 38:
                 inicial = 6
                 yArriba = true;
+                link.isMoving = true
+
                 break;
             //Derecha
             case 39:
                 inicial = 4
                 xDerecha = true;
+                link.isMoving = true
+
                 break;
             //Abajo
             case 40:
                 inicial = 0
                 yAbajo = true;
+                link.isMoving = true
+
                 break;
             //ATACAR X
             case 88:
@@ -387,7 +431,6 @@ window.onload = () => {
 
         }
 
-        link.isMoving = true
     }
 
     function desactivaMovimiento(evt) {
