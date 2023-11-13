@@ -14,11 +14,12 @@ window.onload = () => {
     let imagen
 
     // let link = new Player(ANCHOCANVAS / 2, ALTOCANVAS / 2, true)
-    
 
-    
+
+
     let link = new Player(90, 125, true)
-    let octorok = new Enemigo(80, 200, 1,animacionArr = [
+
+    let octorok = new Enemigo(80, 200, 1, animacionArr = [
         [0, 0], [0, 30],//ABAJO
         [31, 0], [31, 30],//IZQUIERDA
         [64, 0], [64, 30],//ARRIBA
@@ -263,7 +264,7 @@ window.onload = () => {
 
     Enemigo.prototype.imagen = imagen
 
-    
+
     Enemigo.prototype.pintarEnemigo = function () {
         ctx.drawImage(this.imagen, // Imagen completa con todos los comecocos (Sprite)
             this.animacionEnemigo[this.posicion][0],    // posicion X del sprite donde se encuentra el comecocos que voy a recortar del sprite para dibujar
@@ -283,8 +284,8 @@ window.onload = () => {
         //     this.y += this.velocidad
         // }
         this.y += this.velocidad
-        if(this.y > ALTOCANVAS){
-            this.y = 50 
+        if (this.y > ALTOCANVAS) {
+            this.y = 50
         }
 
     }
@@ -328,20 +329,33 @@ window.onload = () => {
         link.moverJugador()
         console.log(link.estado);
         //ENEMIGOS
-        octorok.pintarEnemigo()
-        octorok.moverEnemigo()
+        if (octorok.vida > 0) {
+            octorok.pintarEnemigo()
+            octorok.moverEnemigo()
+        }
+
+
+
+
         //COMPROBAR COLISION ENE
-        console.log(link.vida);
-        if(link.colisiona(octorok)){
-            if(link.vida === 0){
-                clearInterval(id1)
-                clearInterval(animation)
-                console.log('Has muerto')
+        console.log('Link VIDA: ' + link.vida);
+        console.log('OCTOROK VIDA: ' + octorok.vida);
+        if (link.vida === 0) {
+            clearInterval(id1)
+            clearInterval(animation)
+            console.log('Has muerto')
+        }
+        if (link.colisiona(octorok)) {
+            if (link.isAtacking) {
+                octorok.vida--
             }
-            else{
+            else {
                 link.vida--;
             }
         }
+
+
+
         //HUD
         drawHUD()
 
@@ -430,7 +444,7 @@ window.onload = () => {
         if (link.isMoving) {
             link.posicion = link.inicial + (link.posicion + 1) % 2
         }
-        if(octorok.isMoving){
+        if (octorok.isMoving) {
             octorok.posicion = octorok.inicial + (octorok.posicion + 1) % 2
         }
     }
