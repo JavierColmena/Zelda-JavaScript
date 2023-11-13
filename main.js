@@ -1,4 +1,5 @@
 window.onload = () => {
+
     document.body.style.zoom = "200%"
     const CANVAS = document.getElementById('miCanvas')
     let ctx = CANVAS.getContext('2d')
@@ -10,34 +11,32 @@ window.onload = () => {
     const ANCHOCANVAS = CANVAS.width
     const ALTOCANVAS = CANVAS.height
 
-    let github = 'hola'
-
     let imagen
 
     // let link = new Player(ANCHOCANVAS / 2, ALTOCANVAS / 2, true)
-    let tamañoEspadaY = 0
-    let tamañoEspadaYY = 14
-    let tamañoEspadaXX = 10
-    let tamañoEspadaX = 0
+    
+
     
     let link = new Player(90, 125, true)
+    let octorok = new Enemigo(80, 200, 1,animacionArr = [
+        [0, 0], [0, 30],//ABAJO
+        [31, 0], [31, 30],//IZQUIERDA
+        [64, 0], [64, 30],//ARRIBA
+        [92, 0], [92, 30]//DERECHA
+    ])
 
-    let inicial = 0
-    let posicion = 0;
-    let posicionAtaque = 0
+
     let yArriba, yAbajo, xDerecha, xIzquierda
 
 
     let indiceMap = 0
 
-
-
-
     imagen = new Image()
     imagen.src = "./Imagenes/link.png"
 
     id1 = setInterval(Draw, 1000 / 60)
-    animation = setInterval(animacionLink, 1000 / 10)
+    animation = setInterval(animacionPersonajes, 1000 / 10)
+
     document.addEventListener('keydown', activaMovimiento, false)
     document.addEventListener('keyup', desactivaMovimiento, false)
 
@@ -58,9 +57,21 @@ window.onload = () => {
 
         this.ubicacion = "overworld"
 
+        this.inicial = 0
+        this.posicion = 0;
+        this.posicionAtaque = 0
+
+        this.tamañoEspadaY = 0
+        this.tamañoEspadaYY = 14
+        this.tamañoEspadaXX = 10
+        this.tamañoEspadaX = 0
+
+
 
         let offset = 14
+
         this.estado = 'idle'
+
         this.idle =
             [
                 //IDLE
@@ -78,50 +89,205 @@ window.onload = () => {
             [60, 84] /*ARRIBA*/
         ]
 
-        this.vida = 3
+        this.vida = 100
         this.rupias = 0
         this.llaves = 0
         this.bombas = 0
 
         //COLISIONES PARA ENEMIGOS
-        // if (col) {
-        //     this.colisiona = function (otherobj) {
-        //         let left = this.x;
-        //         let right = this.x + (this.tamañoX);
-        //         let top = this.y;
-        //         let bottom = this.y + (this.tamañoY);
+        if (col) {
+            this.colisiona = function (otherobj) {
+                let left = this.x;
+                let right = this.x + (this.tamañoX);
+                let top = this.y;
+                let bottom = this.y + (this.tamañoY);
 
-        //         let objleft = otherobj.x;
-        //         let objright = otherobj.x + (otherobj.tamañoX);
-        //         let objtop = otherobj.y;
-        //         let objbottom = otherobj.y + (otherobj.tamañoY);
-        //         let crash = true;
+                let objleft = otherobj.x;
+                let objright = otherobj.x + (otherobj.tamañoX);
+                let objtop = otherobj.y;
+                let objbottom = otherobj.y + (otherobj.tamañoY);
+                let crash = true;
 
-        //         if ((bottom < objtop) ||
-        //             (top > objbottom) ||
-        //             (right < objleft) ||
-        //             (left > objright)) {
-        //             crash = false;
-        //         }
-        //         return crash;
-        //     }
-        // }
+                if ((bottom < objtop) ||
+                    (top > objbottom) ||
+                    (right < objleft) ||
+                    (left > objright)) {
+                    crash = false;
+                }
+                return crash;
+            }
+        }
     }
 
 
     Player.prototype.imagen = imagen
 
+    Player.prototype.pintarJugador = function () {
 
-    //NO ES MIA, ES DE CHATGPT
-    Player.prototype.colisionaConMapa = function (pantalla) {
-        // Calcula las coordenadas de los tiles que el jugador está tocando
-        const tileX = Math.floor((this.x + this.tamañoX / 2) / this.tamañoX);
-        const tileY = Math.floor((this.y + this.tamañoY - 8 / 2) / this.tamañoY);
+        if (this.estado === 'idle') {
+            ctx.drawImage(this.imagen, // Imagen completa con todos los comecocos (Sprite)
+                this.idle[this.posicion][0],    // link.posicion X del sprite donde se encuentra el comecocos que voy a recortar del sprite para dibujar
+                this.idle[this.posicion][1],	  // link.posicion Y del sprite donde se encuentra el comecocos que voy a recortar del sprite para dibujar
+                this.tileSize, 		    // Tamaño X del comecocos que voy a recortar para dibujar
+                this.tileSize,	        // Tamaño Y del comecocos que voy a recortar para dibujar
+                this.x,                // Posicion x de pantalla donde voy a dibujar el comecocos recortado
+                this.y,				   // Posicion y de pantalla donde voy a dibujar el comecocos recortado
+                this.tamañoX,		   // Tamaño X del comecocos que voy a dibujar
+                this.tamañoY);
+        }
+        else if (this.estado === 'atacando') {
+            ctx.drawImage(this.imagen, // Imagen completa con todos los comecocos (Sprite)
+                this.atacarAnim[this.posicionAtaque][0],    // Posicion X del sprite donde se encuentra el comecocos que voy a recortar del sprite para dibujar
+                this.atacarAnim[this.posicionAtaque][1],	  // Posicion Y del sprite donde se encuentra el comecocos que voy a recortar del sprite para dibujar
+                this.tileSize + this.tamañoEspadaX, 		    // Tamaño X del comecocos que voy a recortar para dibujar
+                this.tileSize + this.tamañoEspadaY,	        // Tamaño Y del comecocos que voy a recortar para dibujar
+                this.x - this.tamañoEspadaXX,                // Posicion x de pantalla donde voy a dibujar el comecocos recortado
+                this.y - this.tamañoEspadaYY,			   // Posicion y de pantalla donde voy a dibujar el comecocos recortado
+                this.tamañoX + this.tamañoEspadaX,		   // Tamaño X del comecocos que voy a dibujar
+                this.tamañoY + this.tamañoEspadaY);
+        }
 
-        // Verifica la colisión con el tile en el que se encuentra el jugador
-        const tileValue = pantalla[tileY][tileX];
-        return !arrayCaminables.includes(tileValue);
-    };
+        // console.log(posicion);
+    }
+
+    Player.prototype.atacar = function () {
+
+        if (this.canAtack && this.isAtacking) {
+            this.estado = 'atacando'
+            this.canMove = false
+
+            //ABAJO 0
+            if (this.inicial === 0) {
+                this.tamañoEspadaY = 13
+                this.tamañoEspadaX = 0
+                this.tamañoEspadaXX = 0
+                this.tamañoEspadaYY = 0
+
+                this.posicionAtaque = 0
+            }
+            //IZQUIERDA 2
+            else if (this.inicial === 2) {
+                this.tamañoEspadaX = 13
+                this.tamañoEspadaXX = 10
+                this.tamañoEspadaY = 0
+                this.tamañoEspadaYY = 0
+
+                this.posicionAtaque = 1
+            }
+            //DERECHA 4
+            else if (this.inicial === 4) {
+                this.tamañoEspadaY = 0
+                this.tamañoEspadaX = 13
+                this.tamañoEspadaXX = 0
+                this.tamañoEspadaYY = 0
+                this.posicionAtaque = 2
+            }
+            //ARRIBA 6
+            else if (this.inicial === 6) {
+                this.tamañoEspadaX = 0
+                this.tamañoEspadaXX = 0
+                this.tamañoEspadaYY = 14
+                this.tamañoEspadaY = 13
+                this.posicionAtaque = 3
+            }
+
+
+            setTimeout(() => {
+                this.estado = 'idle'
+                this.canMove = true
+                this.isAtacking = false
+            }, 500 / 2);
+        }
+
+    }
+
+    Player.prototype.moverJugador = function () {
+
+        if (this.canMove) {
+            if (yAbajo && !collision(this.x, this.y + this.velocidad, overworld[indiceMap])) {
+                this.y += this.velocidad
+                // //TEMPORAL
+                if (this.y >= ALTOCANVAS - this.tamañoX) {
+                    this.y = ALTOCANVAS - this.tamañoX
+                }
+
+            }
+            if (yArriba && !collision(this.x, this.y - this.velocidad, overworld[indiceMap])) {
+                this.y -= this.velocidad
+
+                if (this.y < 0) {
+                    this.y = 0
+                }
+
+            }
+            if (xDerecha && !collision(this.x + this.velocidad, this.y, overworld[indiceMap])) {
+                this.x += this.velocidad
+                // TEMPORAL
+                if (this.x >= ANCHOCANVAS - this.tamañoX) {
+                    this.x = ANCHOCANVAS - this.tamañoX
+                }
+            }
+            if (xIzquierda && !collision(this.x - this.velocidad, this.y, overworld[indiceMap])) {
+                this.x -= this.velocidad
+
+                if (this.x < 0) {
+                    this.x = 0
+                }
+
+            }
+        }
+    }
+
+    function Enemigo(x, y, vida = 1, animacionArr = []) {
+        this.x = x
+        this.y = y
+
+        this.tileSize = 16
+
+        this.tamañoX = 16 * scale
+        this.tamañoY = 16 * scale
+        this.velocidad = 1 * scale
+
+        this.inicial = 0
+        this.posicion = 0;
+
+        this.animacionEnemigo = animacionArr
+
+        this.isMoving = false
+
+        this.vida = vida
+    }
+
+    imagen = new Image()
+    imagen.src = "./Imagenes/enemies.png"
+
+    Enemigo.prototype.imagen = imagen
+
+    
+    Enemigo.prototype.pintarEnemigo = function () {
+        ctx.drawImage(this.imagen, // Imagen completa con todos los comecocos (Sprite)
+            this.animacionEnemigo[this.posicion][0],    // posicion X del sprite donde se encuentra el comecocos que voy a recortar del sprite para dibujar
+            this.animacionEnemigo[this.posicion][1],	  // Posicion Y del sprite donde se encuentra el comecocos que voy a recortar del sprite para dibujar
+            this.tileSize, 		    // Tamaño X del comecocos que voy a recortar para dibujar
+            this.tileSize,	        // Tamaño Y del comecocos que voy a recortar para dibujar
+            this.x,                // Posicion x de pantalla donde voy a dibujar el comecocos recortado
+            this.y,				   // Posicion y de pantalla donde voy a dibujar el comecocos recortado
+            this.tamañoX,		   // Tamaño X del comecocos que voy a dibujar
+            this.tamañoY);
+    }
+
+    Enemigo.prototype.moverEnemigo = function () {
+
+        this.isMoving = true
+        // if(!collision(this.x, this.y + this.velocidad, overworld[indiceMap])){
+        //     this.y += this.velocidad
+        // }
+        this.y += this.velocidad
+        if(this.y > ALTOCANVAS){
+            this.y = 50 
+        }
+
+    }
 
     let overworld = [
         [
@@ -161,6 +327,21 @@ window.onload = () => {
         link.pintarJugador()
         link.moverJugador()
         console.log(link.estado);
+        //ENEMIGOS
+        octorok.pintarEnemigo()
+        octorok.moverEnemigo()
+        //COMPROBAR COLISION ENE
+        console.log(link.vida);
+        if(link.colisiona(octorok)){
+            if(link.vida === 0){
+                clearInterval(id1)
+                clearInterval(animation)
+                console.log('Has muerto')
+            }
+            else{
+                link.vida--;
+            }
+        }
         //HUD
         drawHUD()
 
@@ -245,11 +426,15 @@ window.onload = () => {
         }
     }
 
-    function animacionLink() {
+    function animacionPersonajes() {
         if (link.isMoving) {
-            posicion = inicial + (posicion + 1) % 2
+            link.posicion = link.inicial + (link.posicion + 1) % 2
+        }
+        if(octorok.isMoving){
+            octorok.posicion = octorok.inicial + (octorok.posicion + 1) % 2
         }
     }
+
 
     function collision(x, y, map) {
         for (let i = 0; i < map.length; i++) {
@@ -275,151 +460,35 @@ window.onload = () => {
         }
         return false;
     }
-    Player.prototype.pintarJugador = function () {
 
-
-
-        if (link.estado === 'idle') {
-            ctx.drawImage(link.imagen, // Imagen completa con todos los comecocos (Sprite)
-                link.idle[posicion][0],    // Posicion X del sprite donde se encuentra el comecocos que voy a recortar del sprite para dibujar
-                link.idle[posicion][1],	  // Posicion Y del sprite donde se encuentra el comecocos que voy a recortar del sprite para dibujar
-                link.tileSize, 		    // Tamaño X del comecocos que voy a recortar para dibujar
-                link.tileSize,	        // Tamaño Y del comecocos que voy a recortar para dibujar
-                link.x,                // Posicion x de pantalla donde voy a dibujar el comecocos recortado
-                link.y,				   // Posicion y de pantalla donde voy a dibujar el comecocos recortado
-                link.tamañoX,		   // Tamaño X del comecocos que voy a dibujar
-                link.tamañoY);
-        }
-        else if (link.estado === 'atacando') {
-            ctx.drawImage(link.imagen, // Imagen completa con todos los comecocos (Sprite)
-                link.atacarAnim[posicionAtaque][0],    // Posicion X del sprite donde se encuentra el comecocos que voy a recortar del sprite para dibujar
-                link.atacarAnim[posicionAtaque][1],	  // Posicion Y del sprite donde se encuentra el comecocos que voy a recortar del sprite para dibujar
-                link.tileSize + tamañoEspadaX, 		    // Tamaño X del comecocos que voy a recortar para dibujar
-                link.tileSize + tamañoEspadaY,	        // Tamaño Y del comecocos que voy a recortar para dibujar
-                link.x - tamañoEspadaXX,                // Posicion x de pantalla donde voy a dibujar el comecocos recortado
-                link.y - tamañoEspadaYY,			   // Posicion y de pantalla donde voy a dibujar el comecocos recortado
-                link.tamañoX + tamañoEspadaX,		   // Tamaño X del comecocos que voy a dibujar
-                link.tamañoY + tamañoEspadaY);
-        }
-
-        // console.log(posicion);
-    }
-
-    Player.prototype.atacar = function () {
-
-        if (this.canAtack && this.isAtacking) {
-            this.estado = 'atacando'
-            this.canMove = false
-            
-            //ABAJO 0
-            if (inicial === 0) {
-                tamañoEspadaY = 13
-                tamañoEspadaX = 0
-                tamañoEspadaXX = 0
-                tamañoEspadaYY = 0
-
-                posicionAtaque = 0
-            }
-            //IZQUIERDA 2
-            else if (inicial === 2) {
-                tamañoEspadaX = 13
-                tamañoEspadaXX = 10
-                tamañoEspadaY = 0
-                tamañoEspadaYY = 0
-
-                posicionAtaque = 1
-            }
-            //DERECHA 4
-            else if (inicial === 4) {
-                tamañoEspadaY = 0
-                tamañoEspadaX = 13
-                tamañoEspadaXX = 0
-                tamañoEspadaYY = 0
-                posicionAtaque = 2
-            }
-            //ARRIBA 6
-            else if (inicial === 6) {
-                tamañoEspadaX = 0
-                tamañoEspadaXX = 0
-                tamañoEspadaYY = 14
-                tamañoEspadaY = 13
-                posicionAtaque = 3
-            }
-
-
-            setTimeout(() => {
-                this.estado = 'idle'
-                this.canMove = true
-                this.isAtacking = false
-            }, 500 / 2);
-        }
-
-    }
-
-    Player.prototype.moverJugador = function () {
-
-        if (this.canMove) {
-            if (yAbajo && !collision(link.x, link.y + link.velocidad, overworld[indiceMap])) {
-                this.y += this.velocidad
-                // //TEMPORAL
-                if (this.y >= ALTOCANVAS - this.tamañoX) {
-                    this.y = ALTOCANVAS - this.tamañoX
-                }
-
-            }
-            if (yArriba && !collision(link.x, link.y - link.velocidad, overworld[indiceMap])) {
-                this.y -= this.velocidad
-
-                if (this.y < 0) {
-                    this.y = 0
-                }
-
-            }
-            if (xDerecha && !collision(link.x + link.velocidad, link.y, overworld[indiceMap])) {
-                this.x += this.velocidad
-                // TEMPORAL
-                if (this.x >= ANCHOCANVAS - this.tamañoX) {
-                    this.x = ANCHOCANVAS - this.tamañoX
-                }
-            }
-            if (xIzquierda && !collision(link.x - link.velocidad, link.y, overworld[indiceMap])) {
-                this.x -= this.velocidad
-
-                if (this.x < 0) {
-                    this.x = 0
-                }
-
-            }
-        }
-    }
 
     function activaMovimiento(evt) {
 
         switch (evt.keyCode) {
             //Izquierda
             case 37:
-                inicial = 2
+                link.inicial = 2
                 xIzquierda = true;
                 link.isMoving = true
 
                 break;
             //Arriba
             case 38:
-                inicial = 6
+                link.inicial = 6
                 yArriba = true;
                 link.isMoving = true
 
                 break;
             //Derecha
             case 39:
-                inicial = 4
+                link.inicial = 4
                 xDerecha = true;
                 link.isMoving = true
 
                 break;
             //Abajo
             case 40:
-                inicial = 0
+                link.inicial = 0
                 yAbajo = true;
                 link.isMoving = true
 
