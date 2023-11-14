@@ -92,15 +92,15 @@ window.onload = () => {
         
         //VIDA
         this.maxVida = 3
-        this.vida = 3
+        this.vida = 1000
 
 
         this.rupias = 0
         this.llaves = 0
         this.bombas = 0
         this.kinematic = false;
+        this.col = col
         //COLISIONES PARA ENEMIGOS
-        if (col) {
             this.colisiona = function (otherobj) {
                 let left = this.x;
                 let right = this.x + (this.tamañoX);
@@ -121,7 +121,7 @@ window.onload = () => {
                 }
                 return crash;
             }
-        }
+        
     }
 
 
@@ -161,6 +161,7 @@ window.onload = () => {
             this.estado = 'atacando'
             this.canMove = false
             this.kinematic = false
+            this.isAtacking = true
 
             //ABAJO 0
             if (this.inicial === 0) {
@@ -344,29 +345,39 @@ window.onload = () => {
 
 
         //COMPROBAR COLISION ENE
-        
+        console.log(link.posicion)
+
         if (link.vida === 0) {
             clearInterval(id1)
             clearInterval(animation)
             console.log('Has muerto')
         }
-        if (link.colisiona(octorok) && !(link.kinematic)) {
-            if (link.isAtacking) {
-                octorok.vida--
-                console.log('OCTOROK VIDA: ' + octorok.vida);
-            }
-            else {
-                link.vida--;
-                console.log('Link VIDA: ' + link.vida);
-
-                link.kinematic = true
+            if (!(link.kinematic) && link.colisiona(octorok)) {
+                if (link.isAtacking) {
+                    octorok.vida--
+                    console.log('OCTOROK VIDA: ' + octorok.vida);
+                }
+                else {
+                    if(link.posicion === 0 || link.posicion === 1){
+                        link.y -= 10
+                    }
+                    else if(link.posicion === 2 || link.posicion === 3){
+                        link.x += 10
+                    }
+                    else if(link.posicion === 4 || link.posicion === 5){
+                        link.x -= 10
+                    }
+                    else if(link.posicion === 6 || link.posicion === 7){
+                        link.y += 10
+                    }
+                    link.vida--;
+                    console.log('Link VIDA: ' + link.vida);
+                    link.kinematic = true
+                }
                 setTimeout(function(){
                     link.kinematic = false
                 },1000)
             }
-        }
-
-
 
         //HUD
         drawHUD()
