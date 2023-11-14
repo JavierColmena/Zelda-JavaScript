@@ -19,7 +19,7 @@ window.onload = () => {
 
     let link = new Player(90, 125, true)
 
-    let octorok = new Enemigo(80, 200, 1, animacionArr = [
+    let octorok = new Enemigo(120, 100, 1, animacionArr = [
         [0, 0], [0, 30],//ABAJO
         [31, 0], [31, 30],//IZQUIERDA
         [64, 0], [64, 30],//ARRIBA
@@ -89,12 +89,16 @@ window.onload = () => {
             [84, 90],//DERECHA
             [60, 84] /*ARRIBA*/
         ]
+        
+        //VIDA
+        this.maxVida = 3
+        this.vida = 3
 
-        this.vida = 100
+
         this.rupias = 0
         this.llaves = 0
         this.bombas = 0
-
+        this.kinematic = false;
         //COLISIONES PARA ENEMIGOS
         if (col) {
             this.colisiona = function (otherobj) {
@@ -156,6 +160,7 @@ window.onload = () => {
         if (this.canAtack && this.isAtacking) {
             this.estado = 'atacando'
             this.canMove = false
+            this.kinematic = false
 
             //ABAJO 0
             if (this.inicial === 0) {
@@ -264,7 +269,6 @@ window.onload = () => {
 
     Enemigo.prototype.imagen = imagen
 
-
     Enemigo.prototype.pintarEnemigo = function () {
         ctx.drawImage(this.imagen, // Imagen completa con todos los comecocos (Sprite)
             this.animacionEnemigo[this.posicion][0],    // posicion X del sprite donde se encuentra el comecocos que voy a recortar del sprite para dibujar
@@ -280,13 +284,14 @@ window.onload = () => {
     Enemigo.prototype.moverEnemigo = function () {
 
         this.isMoving = true
-        // if(!collision(this.x, this.y + this.velocidad, overworld[indiceMap])){
-        //     this.y += this.velocidad
-        // }
-        this.y += this.velocidad
-        if (this.y > ALTOCANVAS) {
-            this.y = 50
+        if(!collision(this.x, this.y + this.velocidad, overworld[indiceMap])){
+            this.y += this.velocidad
         }
+
+        // this.y += this.velocidad
+        // if (this.y > ALTOCANVAS) {
+        //     this.y = 50
+        // }
 
     }
 
@@ -324,9 +329,10 @@ window.onload = () => {
         //MAPA
         drawWorld()
         //JUGADOR
-        link.atacar()
         link.pintarJugador()
         link.moverJugador()
+        link.atacar()
+
         console.log(link.estado);
         //ENEMIGOS
         if (octorok.vida > 0) {
@@ -338,19 +344,25 @@ window.onload = () => {
 
 
         //COMPROBAR COLISION ENE
-        console.log('Link VIDA: ' + link.vida);
-        console.log('OCTOROK VIDA: ' + octorok.vida);
+        
         if (link.vida === 0) {
             clearInterval(id1)
             clearInterval(animation)
             console.log('Has muerto')
         }
-        if (link.colisiona(octorok)) {
+        if (link.colisiona(octorok) && !(link.kinematic)) {
             if (link.isAtacking) {
                 octorok.vida--
+                console.log('OCTOROK VIDA: ' + octorok.vida);
             }
             else {
                 link.vida--;
+                console.log('Link VIDA: ' + link.vida);
+
+                link.kinematic = true
+                setTimeout(function(){
+                    link.kinematic = false
+                },1000)
             }
         }
 
