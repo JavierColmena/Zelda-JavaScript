@@ -103,27 +103,27 @@ window.onload = () => {
         this.kinematic = false;
         this.col = col
         //COLISIONES PARA ENEMIGOS
-            this.colisiona = function (otherobj) {
-                let left = this.x;
-                let right = this.x + (this.tamañoX);
-                let top = this.y;
-                let bottom = this.y + (this.tamañoY);
+        this.colisiona = function (otherobj) {
+            let left = this.x;
+            let right = this.x + (this.tamañoX);
+            let top = this.y;
+            let bottom = this.y + (this.tamañoY);
 
-                let objleft = otherobj.x;
-                let objright = otherobj.x + (otherobj.tamañoX);
-                let objtop = otherobj.y;
-                let objbottom = otherobj.y + (otherobj.tamañoY);
-                let crash = true;
+            let objleft = otherobj.x;
+            let objright = otherobj.x + (otherobj.tamañoX);
+            let objtop = otherobj.y;
+            let objbottom = otherobj.y + (otherobj.tamañoY);
+            let crash = true;
 
-                if ((bottom < objtop) ||
-                    (top > objbottom) ||
-                    (right < objleft) ||
-                    (left > objright)) {
-                    crash = false;
-                }
-                return crash;
+            if ((bottom < objtop) ||
+                (top > objbottom) ||
+                (right < objleft) ||
+                (left > objright)) {
+                crash = false;
             }
-        
+            return crash;
+        }
+
     }
 
 
@@ -304,7 +304,7 @@ window.onload = () => {
             [22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22],
             [22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22],
             [22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22],
-            [22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22],
+            [22, 22, 22, 22, 22, 22, 22, 0, 0,22, 22, 22, 22, 22, 22, 22],
             //MAPA
             [61, 61, 61, 61, 61, 61, 61, 2, 2, 61, 61, 61, 61, 61, 61, 61],
             [61, 61, 61, 61, 28, 61, 62, 2, 2, 61, 61, 61, 61, 61, 61, 61],
@@ -338,6 +338,27 @@ window.onload = () => {
             [55, 55, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 55, 55],
             [55, 55, 55, 55, 55, 55, 55, 34, 34, 55, 55, 55, 55, 55, 55, 55],
             [55, 55, 55, 55, 55, 55, 55, 28, 28, 55, 55, 55, 55, 55, 55, 55],
+        ],
+        [
+            //MENU
+            [22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22],
+            [22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22],
+            [22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22],
+            [22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22],
+
+            //MAPA
+            [61, 61, 61, 61, 61, 61, 61, 61, 61, 61, 61, 61, 61, 61, 61, 61],
+            [61, 61, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 61, 61],
+            [61, 61, 2, 2, 2, 2, 3, 4, 4, 5, 2, 2, 2, 2, 61, 61],
+            [61, 61, 2, 2, 2, 20, 21, 28, 28, 23, 20, 2, 2, 2, 61, 61],
+            [61, 61, 1, 2, 1, 2, 2, 2, 2, 2, 2, 1, 2, 1, 61, 61],
+            [61, 61, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 61, 61],
+            [61, 61, 1, 2, 1, 2, 2, 2, 2, 2, 2, 1, 2, 1, 61, 61],
+            [61, 61, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 61, 61],
+            [61, 61, 1, 2, 1, 2, 2, 2, 2, 2, 2, 1, 2, 1, 61, 61],
+            [61, 61, 43, 43, 43, 43, 43, 2, 2, 43, 43, 43, 43, 43, 61, 61],
+            [61, 61, 61, 61, 61, 61, 61, 2, 2, 61, 61, 61, 61, 61, 61, 61],
+            [61, 61, 61, 61, 61, 61, 61, 0, 0, 61, 61, 61, 61, 61, 61, 61],
         ]
     ]
 
@@ -352,7 +373,7 @@ window.onload = () => {
         // console.log(link);
         //MAPA
         drawWorld()
-        changeWorldLinkPosition()
+        checkWorldObjects()
         //JUGADOR
         link.pintarJugador()
         link.moverJugador()
@@ -376,32 +397,32 @@ window.onload = () => {
             clearInterval(animation)
             console.log('Has muerto')
         }
-            if (!(link.kinematic) && link.colisiona(octorok)) {
-                if (link.isAtacking) {
-                    octorok.vida--
-                    console.log('OCTOROK VIDA: ' + octorok.vida);
-                }
-                else {
-                    if(link.posicion === 0 || link.posicion === 1){
-                        link.y -= 10
-                    }
-                    else if(link.posicion === 2 || link.posicion === 3){
-                        link.x += 10
-                    }
-                    else if(link.posicion === 4 || link.posicion === 5){
-                        link.x -= 10
-                    }
-                    else if(link.posicion === 6 || link.posicion === 7){
-                        link.y += 10
-                    }
-                    link.vida--;
-                    console.log('Link VIDA: ' + link.vida);
-                    link.kinematic = true
-                }
-                setTimeout(function(){
-                    link.kinematic = false
-                }, 1000)
+        if (!(link.kinematic) && link.colisiona(octorok)) {
+            if (link.isAtacking) {
+                octorok.vida--
+                console.log('OCTOROK VIDA: ' + octorok.vida);
             }
+            else {
+                if (link.posicion === 0 || link.posicion === 1) {
+                    link.y -= 10
+                }
+                else if (link.posicion === 2 || link.posicion === 3) {
+                    link.x += 10
+                }
+                else if (link.posicion === 4 || link.posicion === 5) {
+                    link.x -= 10
+                }
+                else if (link.posicion === 6 || link.posicion === 7) {
+                    link.y += 10
+                }
+                link.vida--;
+                console.log('Link VIDA: ' + link.vida);
+                link.kinematic = true
+            }
+            setTimeout(function () {
+                link.kinematic = false
+            }, 1000)
+        }
 
         //HUD
         drawHUD()
@@ -459,20 +480,33 @@ window.onload = () => {
 
     }
 
-    function changeWorldLinkPosition() {
+    function checkWorldObjects() {
         console.log(link.entrando);
-        if(link.entrando === false && indiceMap === 0){
+        //GUARDAR ULTIMA COORDENADA DE LA PANTALLA 0
+        if (link.entrando === false && indiceMap === 0) {
             oldLinkX = link.x
             oldLinkY = link.y
         }
-        else if (link.entrando === true && indiceMap === 1) {
+
+        //CUEVA COORD
+        if (link.entrando === true && indiceMap === 1) {
             link.x = ANCHOCANVAS / 2
             link.y = ALTOCANVAS - 30
         }
-        else if (link.entrando === true && indiceMap === 0){
+        else if (link.entrando === true && indiceMap === 0) {
             link.x = oldLinkX
             link.y = oldLinkY
         }
+        //PANTALLA 3 COORD
+        if (link.entrando === true && indiceMap === 2) {
+            link.x = ANCHOCANVAS / 2
+            link.y = ALTOCANVAS - 30
+        }
+        else if (link.entrando === true && indiceMap === 0) {
+            link.x = oldLinkX
+            link.y = oldLinkY + 30
+        }
+        
     }
 
     function drawMap(mapa) {
@@ -506,6 +540,9 @@ window.onload = () => {
     function collision(x, y, map) {
         for (let i = 0; i < map.length; i++) {
             for (let j = 0; j < map[i].length; j++) {
+                //Esto es una cerdada, pero no me da tiempo a hacer dinámico
+
+                //IR DE LA PANTALLA 0 A LA 1
                 if (indiceMap === 0 && map[i][j] === 28) {
                     if (x <= j * 16 + 12 &&
                         x + 12 >= j * 16 &&
@@ -514,12 +551,13 @@ window.onload = () => {
 
                         indiceMap = 1
                         link.entrando = true
-                        setTimeout(()=>{
+                        setTimeout(() => {
                             link.entrando = false
-                        },100)
+                        }, 100)
                         console.log('entrada');
                     }
                 }
+                //VOLVER DE LA PANTALLA 1 A LA PANTALLA 0
                 else if (indiceMap === 1 && map[i][j] === 28) {
                     if (x <= j * 16 + 12 &&
                         x + 12 >= j * 16 &&
@@ -528,12 +566,45 @@ window.onload = () => {
 
                         indiceMap = 0
                         link.entrando = true
-                        setTimeout(()=>{
+                        setTimeout(() => {
                             link.entrando = false
-                        },100)
+                        }, 100)
                         console.log('entrada');
                     }
                 }
+
+                //IR DE LA PANTALLA 0 A LA 3
+                if (indiceMap === 0 && map[i][j] === 0) {
+                    if (x <= j * 16 + 12 &&
+                        x + 12 >= j * 16 &&
+                        y + 10 <= i * 16 + 16 &&
+                        y + 14 >= i * 16) {
+
+                        indiceMap = 2
+                        link.entrando = true
+                        setTimeout(() => {
+                            link.entrando = false
+                        }, 100)
+                        console.log('entrada');
+                    }
+                }
+                // VOLVER DE LA PANTALLA 3 A LA 0
+                else if (indiceMap === 2 && map[i][j] === 0) {
+                    if (x <= j * 16 + 12 &&
+                        x + 12 >= j * 16 &&
+                        y + 10 <= i * 16 + 16 &&
+                        y + 14 >= i * 16) {
+
+                        indiceMap = 0
+                        link.entrando = true
+                        setTimeout(() => {
+                            link.entrando = false
+                        }, 100)
+                        console.log('entrada');
+                    }
+                }
+
+                //COLISIONES CON EL RESTO DEL MAPA
                 if (map[i][j] != 2 && map[i][j] != 28 && map[i][j] != 34) {
                     if (x <= j * 16 + 12 &&
                         x + 12 >= j * 16 &&
