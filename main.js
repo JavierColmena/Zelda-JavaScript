@@ -1,6 +1,6 @@
 window.onload = () => {
 
-    document.body.style.zoom = "200%"
+    document.body.style.zoom = "300%"
     const CANVAS = document.getElementById('miCanvas')
     let ctx = CANVAS.getContext('2d')
 
@@ -18,8 +18,9 @@ window.onload = () => {
 
 
     let link = new Player(90, 125, true)
+    let oldLinkX, oldLinkY
 
-    let octorok = new Enemigo(120, 100, 1, animacionArr = [
+    let octorok = new Enemigo(-1, -1, 1, animacionArr = [
         [0, 0], [0, 30],//ABAJO
         [31, 0], [31, 30],//IZQUIERDA
         [64, 0], [64, 30],//ARRIBA
@@ -57,6 +58,7 @@ window.onload = () => {
         this.isAtacking = false;
 
         this.ubicacion = "overworld"
+        this.entrando = false
 
         this.inicial = 0
         this.posicion = 0;
@@ -89,7 +91,7 @@ window.onload = () => {
             [84, 90],//DERECHA
             [60, 84] /*ARRIBA*/
         ]
-        
+
         //VIDA
         this.maxVida = 3
         this.vida = 3
@@ -284,7 +286,7 @@ window.onload = () => {
     Enemigo.prototype.moverEnemigo = function () {
 
         this.isMoving = true
-        if(!collision(this.x, this.y + this.velocidad, overworld[indiceMap])){
+        if (!collision(this.x, this.y + this.velocidad, overworld[indiceMap])) {
             this.y += this.velocidad
         }
 
@@ -303,17 +305,38 @@ window.onload = () => {
             [22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22],
             [22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22],
             //MAPA
-            [25, 25, 25, 25, 25, 25, 25, 2, 2, 96, 97, 97, 97, 97, 97, 97],
-            [25, 25, 25, 25, 25, 25, 25, 2, 2, 96, 97, 97, 97, 97, 97, 97],
-            [25, 25, 9, 10, 11, 2, 2, 2, 2, 96, 97, 97, 97, 97, 97, 97],
-            [25, 25, 27, 28, 29, 2, 2, 2, 2, 96, 97, 97, 97, 97, 97, 97],
-            [2, 2, 2, 2, 2, 2, 2, 2, 2, 96, 97, 97, 97, 97, 97, 97],
-            [2, 2, 2, 2, 2, 2, 2, 2, 2, 114, 115, 115, 115, 115, 115, 115],
-            [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
-            [25, 25, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
-            [25, 25, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
-            [25, 25, 25, 2, 2, 2, 25, 25, 25, 25, 2, 2, 2, 25, 25, 2],
-            [25, 25, 25, 2, 2, 2, 25, 25, 25, 25, 2, 2, 2, 25, 25, 2]
+            [61, 61, 61, 61, 61, 61, 61, 2, 2, 61, 61, 61, 61, 61, 61, 61],
+            [61, 61, 61, 61, 28, 61, 62, 2, 2, 61, 61, 61, 61, 61, 61, 61],
+            [61, 61, 61, 62, 2, 2, 2, 2, 2, 61, 61, 61, 61, 61, 61, 61],
+            [61, 61, 62, 2, 2, 2, 2, 2, 2, 61, 61, 61, 61, 61, 61, 61],
+            [61, 62, 2, 2, 2, 2, 2, 2, 2, 60, 61, 61, 61, 61, 61, 61],
+            [1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1],
+            [43, 43, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 43, 43],
+            [61, 61, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 61, 61],
+            [61, 61, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 61, 61],
+            [61, 61, 43, 43, 43, 43, 43, 43, 43, 43, 43, 43, 43, 43, 61, 61],
+            [61, 61, 61, 61, 61, 61, 61, 61, 61, 61, 61, 61, 61, 61, 61, 61],
+            [61, 61, 61, 61, 61, 61, 61, 61, 61, 61, 61, 61, 61, 61, 61, 61],
+        ],
+        [
+            //MENU
+            [22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22],
+            [22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22],
+            [22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22],
+            [22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22],
+
+            //MAPA
+            [55, 55, 55, 55, 55, 55, 55, 55, 55, 55, 55, 55, 55, 55, 55, 55],
+            [55, 55, 55, 55, 55, 55, 55, 55, 55, 55, 55, 55, 55, 55, 55, 55],
+            [55, 55, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 55, 55],
+            [55, 55, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 55, 55],
+            [55, 55, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 55, 55],
+            [55, 55, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 55, 55],
+            [55, 55, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 55, 55],
+            [55, 55, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 55, 55],
+            [55, 55, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 55, 55],
+            [55, 55, 55, 55, 55, 55, 55, 34, 34, 55, 55, 55, 55, 55, 55, 55],
+            [55, 55, 55, 55, 55, 55, 55, 28, 28, 55, 55, 55, 55, 55, 55, 55],
         ]
     ]
 
@@ -328,6 +351,7 @@ window.onload = () => {
         // console.log(link);
         //MAPA
         drawWorld()
+        changeWorldLinkPosition()
         //JUGADOR
         link.pintarJugador()
         link.moverJugador()
@@ -344,7 +368,7 @@ window.onload = () => {
 
 
         //COMPROBAR COLISION ENE
-        
+
         if (link.vida === 0) {
             clearInterval(id1)
             clearInterval(animation)
@@ -360,13 +384,11 @@ window.onload = () => {
                 console.log('Link VIDA: ' + link.vida);
 
                 link.kinematic = true
-                setTimeout(function(){
+                setTimeout(function () {
                     link.kinematic = false
-                },1000)
+                }, 1000)
             }
         }
-
-
 
         //HUD
         drawHUD()
@@ -420,23 +442,29 @@ window.onload = () => {
         ctx.globalAlpha = 1;
         drawMap(overworld[indiceMap])
         ctx.restore()
-        // if (link.y < (16 * 4) - 8) {
-        //     indiceMap = 0
-        // }
+
+
+    }
+
+    function changeWorldLinkPosition() {
+        console.log(link.entrando);
+        if(link.entrando === false && indiceMap === 0){
+            oldLinkX = link.x
+            oldLinkY = link.y
+        }
+        else if (link.entrando === true && indiceMap === 1) {
+            link.x = ANCHOCANVAS / 2
+            link.y = ALTOCANVAS - 30
+        }
+        else if (link.entrando === true && indiceMap === 0){
+            link.x = oldLinkX
+            link.y = oldLinkY
+        }
     }
 
     function drawMap(mapa) {
         for (let i = 0; i < mapa.length; i++) {
             for (let j = 0; j < mapa[i].length; j++) {
-                // ctx.drawImage(imagen, // Imagen completa con todos los comecocos (Sprite)
-                // ((overworld[i][j] * 14.5) + 1),    // Posicion X del sprite donde se encuentra el comecocos que voy a recortar del sprite para dibujar
-                // (overworld[i][j] * 0 + 1),	  // Posicion Y del sprite donde se encuentra el comecocos que voy a recortar del sprite para dibujar
-                // 16, 		    // Tamaño X del comecocos que voy a recortar para dibujar
-                // 16,	        // Tamaño Y del comecocos que voy a recortar para dibujar
-                // 16 * j * scale,                // Posicion x de pantalla donde voy a dibujar el comecocos recortado
-                // 16 * i * scale,				   // Posicion y de pantalla donde voy a dibujar el comecocos recortado
-                // 16,		   // Tamaño X del comecocos que voy a dibujar
-                // 16);
 
                 ctx.drawImage(imagen,
                     ((mapa[i][j] % 18) * 17) + 1,
@@ -465,16 +493,35 @@ window.onload = () => {
     function collision(x, y, map) {
         for (let i = 0; i < map.length; i++) {
             for (let j = 0; j < map[i].length; j++) {
-                if (map[i][j] === 28) {
+                if (indiceMap === 0 && map[i][j] === 28) {
                     if (x <= j * 16 + 12 &&
                         x + 12 >= j * 16 &&
                         y + 10 <= i * 16 + 16 &&
                         y + 14 >= i * 16) {
 
+                        indiceMap = 1
+                        link.entrando = true
+                        setTimeout(()=>{
+                            link.entrando = false
+                        },100)
                         console.log('entrada');
                     }
                 }
-                else if (map[i][j] != 2 && map[i][j] != 28) {
+                else if (indiceMap === 1 && map[i][j] === 28) {
+                    if (x <= j * 16 + 12 &&
+                        x + 12 >= j * 16 &&
+                        y + 10 <= i * 16 + 16 &&
+                        y + 14 >= i * 16) {
+
+                        indiceMap = 0
+                        link.entrando = true
+                        setTimeout(()=>{
+                            link.entrando = false
+                        },100)
+                        console.log('entrada');
+                    }
+                }
+                if (map[i][j] != 2 && map[i][j] != 28 && map[i][j] != 34) {
                     if (x <= j * 16 + 12 &&
                         x + 12 >= j * 16 &&
                         y + 10 <= i * 16 + 16 &&
