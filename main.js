@@ -20,12 +20,30 @@ window.onload = () => {
     let link = new Player(90, 125, true)
     let oldLinkX, oldLinkY
 
-    let octorok = new Enemigo(-1, -1, 1, animacionArr = [
-        [0, 0], [0, 30],//ABAJO
-        [31, 0], [31, 30],//IZQUIERDA
-        [64, 0], [64, 30],//ARRIBA
-        [92, 0], [92, 30]//DERECHA
-    ])
+    let octoroks = []
+
+    function generarEnemigosPantalla(indiceMap){
+
+        if(indiceMap === 2){
+            for (let i = 0; i < 3; i++) {
+                let octorok = new Enemigo(32 + Math.random() * 192, 16 + Math.random() * 128, 1, animacionArr = [
+                    [0, 0], [0, 30],//ABAJO
+                    [31, 0], [31, 30],//IZQUIERDA
+                    [64, 0], [64, 30],//ARRIBA
+                    [92, 0], [92, 30]//DERECHA
+                ])
+                octoroks.push(octorok)
+            }
+        }
+        else{
+            octoroks = []
+        }
+
+
+        
+    }
+
+
 
 
     let yArriba, yAbajo, xDerecha, xIzquierda
@@ -381,10 +399,7 @@ window.onload = () => {
 
         console.log(link.estado);
         //ENEMIGOS
-        if (octorok.vida > 0) {
-            octorok.pintarEnemigo()
-            octorok.moverEnemigo()
-        }
+
 
 
 
@@ -397,32 +412,32 @@ window.onload = () => {
             clearInterval(animation)
             console.log('Has muerto')
         }
-        if (!(link.kinematic) && link.colisiona(octorok)) {
-            if (link.isAtacking) {
-                octorok.vida--
-                console.log('OCTOROK VIDA: ' + octorok.vida);
-            }
-            else {
-                if (link.posicion === 0 || link.posicion === 1) {
-                    link.y -= 10
-                }
-                else if (link.posicion === 2 || link.posicion === 3) {
-                    link.x += 10
-                }
-                else if (link.posicion === 4 || link.posicion === 5) {
-                    link.x -= 10
-                }
-                else if (link.posicion === 6 || link.posicion === 7) {
-                    link.y += 10
-                }
-                link.vida--;
-                console.log('Link VIDA: ' + link.vida);
-                link.kinematic = true
-            }
-            setTimeout(function () {
-                link.kinematic = false
-            }, 1000)
-        }
+        // if (!(link.kinematic) && link.colisiona(octorok)) {
+        //     if (link.isAtacking) {
+        //         octorok.vida--
+        //         console.log('OCTOROK VIDA: ' + octorok.vida);
+        //     }
+        //     else {
+        //         if (link.posicion === 0 || link.posicion === 1) {
+        //             link.y -= 10
+        //         }
+        //         else if (link.posicion === 2 || link.posicion === 3) {
+        //             link.x += 10
+        //         }
+        //         else if (link.posicion === 4 || link.posicion === 5) {
+        //             link.x -= 10
+        //         }
+        //         else if (link.posicion === 6 || link.posicion === 7) {
+        //             link.y += 10
+        //         }
+        //         link.vida--;
+        //         console.log('Link VIDA: ' + link.vida);
+        //         link.kinematic = true
+        //     }
+        //     setTimeout(function () {
+        //         link.kinematic = false
+        //     }, 1000)
+        // }
 
         //HUD
         drawHUD()
@@ -491,7 +506,7 @@ window.onload = () => {
         //CUEVA COORD
         if (link.entrando === true && indiceMap === 1) {
             link.x = ANCHOCANVAS / 2
-            link.y = ALTOCANVAS - 30
+            link.y = ALTOCANVAS - 45
         }
         else if (link.entrando === true && indiceMap === 0) {
             link.x = oldLinkX
@@ -504,7 +519,7 @@ window.onload = () => {
         }
         else if (link.entrando === true && indiceMap === 0) {
             link.x = oldLinkX
-            link.y = oldLinkY + 30
+            link.y = oldLinkY + 5
         }
         
     }
@@ -531,9 +546,9 @@ window.onload = () => {
         if (link.isMoving) {
             link.posicion = link.inicial + (link.posicion + 1) % 2
         }
-        if (octorok.isMoving) {
-            octorok.posicion = octorok.inicial + (octorok.posicion + 1) % 2
-        }
+        // if (octorok.isMoving) {
+        //     octorok.posicion = octorok.inicial + (octorok.posicion + 1) % 2
+        // }
     }
 
 
