@@ -21,29 +21,7 @@ window.onload = () => {
     let oldLinkX, oldLinkY
 
     let octoroks = []
-
-    function generarEnemigosPantalla(indiceMap){
-
-        if(indiceMap === 2){
-            for (let i = 0; i < 3; i++) {
-                let octorok = new Enemigo(32 + Math.random() * 192, 16 + Math.random() * 128, 1, animacionArr = [
-                    [0, 0], [0, 30],//ABAJO
-                    [31, 0], [31, 30],//IZQUIERDA
-                    [64, 0], [64, 30],//ARRIBA
-                    [92, 0], [92, 30]//DERECHA
-                ])
-                octoroks.push(octorok)
-            }
-        }
-        else{
-            octoroks = []
-        }
-
-
-        
-    }
-
-
+    let isGenerate = false;
 
 
     let yArriba, yAbajo, xDerecha, xIzquierda
@@ -120,6 +98,9 @@ window.onload = () => {
         this.bombas = 0
         this.kinematic = false;
         this.col = col
+
+
+
         //COLISIONES PARA ENEMIGOS
         this.colisiona = function (otherobj) {
             let left = this.x;
@@ -169,13 +150,47 @@ window.onload = () => {
                 this.x - this.tamañoEspadaXX,                // Posicion x de pantalla donde voy a dibujar el comecocos recortado
                 this.y - this.tamañoEspadaYY,			   // Posicion y de pantalla donde voy a dibujar el comecocos recortado
                 this.tamañoX + this.tamañoEspadaX,		   // Tamaño X del comecocos que voy a dibujar
-                this.tamañoY + this.tamañoEspadaY);
+                this.tamañoY + this.tamañoEspadaY
+            );
+
+        }
+        if(link.col){
+            ctx.strokeStyle = "green";
+            ctx.strokeRect(this.x, this.y, this.tamañoX, this.tamañoY);
         }
 
         // console.log(posicion);
     }
 
+    Player.prototype.espada = {
+        x: 0,
+        y: 0,
+        tamañoX: 3,
+        tamañoY: 11,
+        colisiona: function (otherobj) {
+            let left = this.x;
+            let right = this.x + (this.tamañoX);
+            let top = this.y;
+            let bottom = this.y + (this.tamañoY);
+
+            let objleft = otherobj.x;
+            let objright = otherobj.x + (otherobj.tamañoX);
+            let objtop = otherobj.y;
+            let objbottom = otherobj.y + (otherobj.tamañoY);
+            let crash = true;
+
+            if ((bottom < objtop) ||
+                (top > objbottom) ||
+                (right < objleft) ||
+                (left > objright)) {
+                crash = false;
+            }
+            return crash;
+        }
+    }
+
     Player.prototype.atacar = function () {
+
 
         if (this.canAtack && this.isAtacking) {
             this.estado = 'atacando'
@@ -183,12 +198,30 @@ window.onload = () => {
             this.kinematic = false
             this.isAtacking = true
 
+            //CREAR COL ESPADA
+            //Mitad ARRIBA ABAJO -> X:7 Y:16 TamañoX: 3 TamañoY: 11
+            //Mitad IZQUIERDA DERECHA -> X:7 Y:16 TamañoX: 11 TamañoY: 3
+
+
+
+            //ACTUALIZAR ESPADA TAMAÑO IMAGEN
+
             //ABAJO 0
             if (this.inicial === 0) {
                 this.tamañoEspadaY = 13
                 this.tamañoEspadaX = 0
                 this.tamañoEspadaXX = 0
                 this.tamañoEspadaYY = 0
+
+                link.espada.x = link.x + 7
+                link.espada.y = link.y + 16
+                link.espada.tamañoX = 3
+                link.espada.tamañoY = 11
+                if(link.col){
+                    ctx.strokeStyle = "green";
+                    ctx.strokeRect(link.espada.x, link.espada.y, link.espada.tamañoX, link.espada.tamañoY);
+                }
+                
 
                 this.posicionAtaque = 0
             }
@@ -199,6 +232,17 @@ window.onload = () => {
                 this.tamañoEspadaY = 0
                 this.tamañoEspadaYY = 0
 
+                link.espada.x = link.x - 10
+                link.espada.y = link.y + 7
+                link.espada.tamañoX = 11
+                link.espada.tamañoY = 3
+
+
+                if(link.col){
+                    ctx.strokeStyle = "green";
+                    ctx.strokeRect(link.espada.x, link.espada.y, link.espada.tamañoX, link.espada.tamañoY);
+                }
+
                 this.posicionAtaque = 1
             }
             //DERECHA 4
@@ -207,6 +251,17 @@ window.onload = () => {
                 this.tamañoEspadaX = 13
                 this.tamañoEspadaXX = 0
                 this.tamañoEspadaYY = 0
+
+                link.espada.x = link.x + 16
+                link.espada.y = link.y + 7
+                link.espada.tamañoX = 11
+                link.espada.tamañoY = 3
+
+                if(link.col){
+                    ctx.strokeStyle = "green";
+                    ctx.strokeRect(link.espada.x, link.espada.y, link.espada.tamañoX, link.espada.tamañoY);
+                }
+
                 this.posicionAtaque = 2
             }
             //ARRIBA 6
@@ -215,6 +270,17 @@ window.onload = () => {
                 this.tamañoEspadaXX = 0
                 this.tamañoEspadaYY = 14
                 this.tamañoEspadaY = 13
+
+                link.espada.x = link.x + 6
+                link.espada.y = link.y - 12
+                link.espada.tamañoX = 3
+                link.espada.tamañoY = 13
+
+                if(link.col){
+                    ctx.strokeStyle = "green";
+                    ctx.strokeRect(link.espada.x, link.espada.y, link.espada.tamañoX, link.espada.tamañoY);
+                }
+
                 this.posicionAtaque = 3
             }
 
@@ -223,6 +289,10 @@ window.onload = () => {
                 this.estado = 'idle'
                 this.canMove = true
                 this.isAtacking = false
+
+                link.espada.x = null
+                link.espada.y = null
+
             }, 500 / 2);
         }
 
@@ -231,7 +301,7 @@ window.onload = () => {
     Player.prototype.moverJugador = function () {
 
         if (this.canMove) {
-            if (yAbajo && !collision(this.x, this.y + this.velocidad, overworld[indiceMap])) {
+            if (yAbajo && !collision(this.x, this.y + this.velocidad, overworld[indiceMap], true)) {
                 this.y += this.velocidad
                 // //TEMPORAL
                 if (this.y >= ALTOCANVAS - this.tamañoX) {
@@ -239,7 +309,7 @@ window.onload = () => {
                 }
 
             }
-            if (yArriba && !collision(this.x, this.y - this.velocidad, overworld[indiceMap])) {
+            if (yArriba && !collision(this.x, this.y - this.velocidad, overworld[indiceMap], true)) {
                 this.y -= this.velocidad
 
                 if (this.y < 0) {
@@ -247,14 +317,14 @@ window.onload = () => {
                 }
 
             }
-            if (xDerecha && !collision(this.x + this.velocidad, this.y, overworld[indiceMap])) {
+            if (xDerecha && !collision(this.x + this.velocidad, this.y, overworld[indiceMap], true)) {
                 this.x += this.velocidad
                 // TEMPORAL
                 if (this.x >= ANCHOCANVAS - this.tamañoX) {
                     this.x = ANCHOCANVAS - this.tamañoX
                 }
             }
-            if (xIzquierda && !collision(this.x - this.velocidad, this.y, overworld[indiceMap])) {
+            if (xIzquierda && !collision(this.x - this.velocidad, this.y, overworld[indiceMap], true)) {
                 this.x -= this.velocidad
 
                 if (this.x < 0) {
@@ -265,9 +335,11 @@ window.onload = () => {
         }
     }
 
-    function Enemigo(x, y, vida = 1, animacionArr = []) {
+    function Enemigo(x, y, vida = 1, animacionArr = [], nombre) {
         this.x = x
         this.y = y
+
+        this.nombre = nombre;
 
         this.tileSize = 16
 
@@ -300,12 +372,15 @@ window.onload = () => {
             this.y,				   // Posicion y de pantalla donde voy a dibujar el comecocos recortado
             this.tamañoX,		   // Tamaño X del comecocos que voy a dibujar
             this.tamañoY);
+            
+            ctx.strokeStyle = "red";
+            ctx.strokeRect(this.x, this.y, this.tamañoX, this.tamañoY);
     }
 
     Enemigo.prototype.moverEnemigo = function () {
 
         this.isMoving = true
-        if (!collision(this.x, this.y + this.velocidad, overworld[indiceMap])) {
+        if (!collision(this.x, this.y + this.velocidad, overworld[indiceMap], false)) {
             this.y += this.velocidad
         }
 
@@ -316,13 +391,56 @@ window.onload = () => {
 
     }
 
+    function generarEnemigosPantalla(indiceMap) {
+
+        if (indiceMap === 2) {
+            if (!isGenerate) {
+
+                let octorok = new Enemigo(50, 100, 1, animacionArr = [
+                    [0, 0], [0, 30],//ABAJO
+                    [31, 0], [31, 30],//IZQUIERDA
+                    [64, 0], [64, 30],//ARRIBA
+                    [92, 0], [92, 30]//DERECHA
+                ], 'octorok')
+                octoroks.push(octorok)
+                octorok = new Enemigo(190, 160, 1, animacionArr = [
+                    [0, 0], [0, 30],//ABAJO
+                    [31, 0], [31, 30],//IZQUIERDA
+                    [64, 0], [64, 30],//ARRIBA
+                    [92, 0], [92, 30]//DERECHA
+                ], 'octorok')
+                octoroks.push(octorok)
+                octorok = new Enemigo(130, 160, 1, animacionArr = [
+                    [0, 0], [0, 30],//ABAJO
+                    [31, 0], [31, 30],//IZQUIERDA
+                    [64, 0], [64, 30],//ARRIBA
+                    [92, 0], [92, 30]//DERECHA
+                ], 'octorok')
+                octoroks.push(octorok)
+
+                isGenerate = true;
+            }
+
+            for (let i = 0; i < octoroks.length; i++) {
+                octoroks[i].pintarEnemigo()
+                octoroks[i].moverEnemigo()
+            }
+
+        }
+        else {
+            octoroks = []
+            isGenerate = false;
+        }
+    }
+
+
     let overworld = [
         [
             //MENU
             [22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22],
             [22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22],
             [22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22],
-            [22, 22, 22, 22, 22, 22, 22, 0, 0,22, 22, 22, 22, 22, 22, 22],
+            [22, 22, 22, 22, 22, 22, 22, 0, 0, 22, 22, 22, 22, 22, 22, 22],
             //MAPA
             [61, 61, 61, 61, 61, 61, 61, 2, 2, 61, 61, 61, 61, 61, 61, 61],
             [61, 61, 61, 61, 28, 61, 62, 2, 2, 61, 61, 61, 61, 61, 61, 61],
@@ -371,7 +489,7 @@ window.onload = () => {
             [61, 61, 2, 2, 2, 20, 21, 28, 28, 23, 20, 2, 2, 2, 61, 61],
             [61, 61, 1, 2, 1, 2, 2, 2, 2, 2, 2, 1, 2, 1, 61, 61],
             [61, 61, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 61, 61],
-            [61, 61, 1, 2, 1, 2, 2, 2, 2, 2, 2, 1, 2, 1, 61, 61],
+            [61, 61, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 61, 61],
             [61, 61, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 61, 61],
             [61, 61, 1, 2, 1, 2, 2, 2, 2, 2, 2, 1, 2, 1, 61, 61],
             [61, 61, 43, 43, 43, 43, 43, 2, 2, 43, 43, 43, 43, 43, 61, 61],
@@ -396,52 +514,72 @@ window.onload = () => {
         link.pintarJugador()
         link.moverJugador()
         link.atacar()
-
-        console.log(link.estado);
         //ENEMIGOS
-
-
-
-
+        generarEnemigosPantalla(indiceMap)
 
         //COMPROBAR COLISION ENE
-        console.log(link.posicion)
+        checkEnemyCol()
+        //HUD
+        drawHUD()
+
+    }
+
+    function checkEnemyCol() {
 
         if (link.vida === 0) {
             clearInterval(id1)
             clearInterval(animation)
             console.log('Has muerto')
         }
-        // if (!(link.kinematic) && link.colisiona(octorok)) {
-        //     if (link.isAtacking) {
-        //         octorok.vida--
-        //         console.log('OCTOROK VIDA: ' + octorok.vida);
-        //     }
-        //     else {
-        //         if (link.posicion === 0 || link.posicion === 1) {
-        //             link.y -= 10
-        //         }
-        //         else if (link.posicion === 2 || link.posicion === 3) {
-        //             link.x += 10
-        //         }
-        //         else if (link.posicion === 4 || link.posicion === 5) {
-        //             link.x -= 10
-        //         }
-        //         else if (link.posicion === 6 || link.posicion === 7) {
-        //             link.y += 10
-        //         }
-        //         link.vida--;
-        //         console.log('Link VIDA: ' + link.vida);
-        //         link.kinematic = true
-        //     }
-        //     setTimeout(function () {
-        //         link.kinematic = false
-        //     }, 1000)
-        // }
 
-        //HUD
-        drawHUD()
+        octoroks.forEach(octorok => {
 
+            if (!(link.kinematic) && link.colisiona(octorok)) {
+
+                // NOCKBACK
+                if (link.posicion === 0 || link.posicion === 1) {
+                    link.y -= 20
+                }
+                else if (link.posicion === 2 || link.posicion === 3) {
+                    link.x += 20
+                }
+                else if (link.posicion === 4 || link.posicion === 5) {
+                    link.x -= 20
+                }
+                else if (link.posicion === 6 || link.posicion === 7) {
+                    link.y += 20
+                }
+
+                link.vida--;
+                console.log('Link VIDA: ' + link.vida);
+                link.kinematic = true
+
+                setTimeout(function () {
+                    link.kinematic = false
+                }, 1000)
+                
+
+            }
+            if (link.isAtacking && link.espada.colisiona(octorok)) {
+                link.kinematic = true
+
+                setTimeout(function () {
+                    link.kinematic = false
+                }, 1000)
+
+                octorok.vida--
+                console.log('OCTOROK VIDA: ' + octorok.vida);
+
+                if (octorok.vida <= 0) {
+                    octoroks.splice(octoroks.indexOf(octorok), 1)
+                }
+
+                
+
+            }
+
+
+        });
     }
 
     function drawHUD() {
@@ -496,7 +634,18 @@ window.onload = () => {
     }
 
     function checkWorldObjects() {
-        console.log(link.entrando);
+
+        //COMPRUEBA Y MODIFICA LA UBICACION
+        switch (indiceMap) {
+            case 0:
+            case 2:
+                link.ubicacion = 'overworld'
+                break;
+            case 1:
+                link.ubicacion = 'cueva'
+                break;
+        }
+
         //GUARDAR ULTIMA COORDENADA DE LA PANTALLA 0
         if (link.entrando === false && indiceMap === 0) {
             oldLinkX = link.x
@@ -521,7 +670,7 @@ window.onload = () => {
             link.x = oldLinkX
             link.y = oldLinkY + 5
         }
-        
+
     }
 
     function drawMap(mapa) {
@@ -546,81 +695,85 @@ window.onload = () => {
         if (link.isMoving) {
             link.posicion = link.inicial + (link.posicion + 1) % 2
         }
-        // if (octorok.isMoving) {
-        //     octorok.posicion = octorok.inicial + (octorok.posicion + 1) % 2
-        // }
+
+        octoroks.forEach(octorok => {
+            if (octorok.isMoving) {
+                octorok.posicion = octorok.inicial + (octorok.posicion + 1) % 2
+            }
+        });
     }
 
-
-    function collision(x, y, map) {
+    function collision(x, y, map, isLink) {
         for (let i = 0; i < map.length; i++) {
             for (let j = 0; j < map[i].length; j++) {
                 //Esto es una cerdada, pero no me da tiempo a hacer dinámico
 
-                //IR DE LA PANTALLA 0 A LA 1
-                if (indiceMap === 0 && map[i][j] === 28) {
-                    if (x <= j * 16 + 12 &&
-                        x + 12 >= j * 16 &&
-                        y + 10 <= i * 16 + 16 &&
-                        y + 14 >= i * 16) {
+                if (isLink) {
+                    //IR DE LA PANTALLA 0 A LA 1
+                    if (indiceMap === 0 && map[i][j] === 28) {
+                        if (x <= j * 16 + 12 &&
+                            x + 12 >= j * 16 &&
+                            y + 10 <= i * 16 + 16 &&
+                            y + 14 >= i * 16) {
 
-                        indiceMap = 1
-                        link.entrando = true
-                        setTimeout(() => {
-                            link.entrando = false
-                        }, 100)
-                        console.log('entrada');
+                            indiceMap = 1
+                            link.entrando = true
+                            setTimeout(() => {
+                                link.entrando = false
+                            }, 100)
+                            console.log('entrada');
+                        }
                     }
-                }
-                //VOLVER DE LA PANTALLA 1 A LA PANTALLA 0
-                else if (indiceMap === 1 && map[i][j] === 28) {
-                    if (x <= j * 16 + 12 &&
-                        x + 12 >= j * 16 &&
-                        y + 10 <= i * 16 + 16 &&
-                        y + 14 >= i * 16) {
+                    //VOLVER DE LA PANTALLA 1 A LA PANTALLA 0
+                    else if (indiceMap === 1 && map[i][j] === 28) {
+                        if (x <= j * 16 + 12 &&
+                            x + 12 >= j * 16 &&
+                            y + 10 <= i * 16 + 16 &&
+                            y + 14 >= i * 16) {
 
-                        indiceMap = 0
-                        link.entrando = true
-                        setTimeout(() => {
-                            link.entrando = false
-                        }, 100)
-                        console.log('entrada');
+                            indiceMap = 0
+                            link.entrando = true
+                            setTimeout(() => {
+                                link.entrando = false
+                            }, 100)
+                            console.log('entrada');
+                        }
                     }
-                }
 
-                //IR DE LA PANTALLA 0 A LA 3
-                if (indiceMap === 0 && map[i][j] === 0) {
-                    if (x <= j * 16 + 12 &&
-                        x + 12 >= j * 16 &&
-                        y + 10 <= i * 16 + 16 &&
-                        y + 14 >= i * 16) {
+                    //IR DE LA PANTALLA 0 A LA 3
+                    if (indiceMap === 0 && map[i][j] === 0) {
+                        if (x <= j * 16 + 12 &&
+                            x + 12 >= j * 16 &&
+                            y + 10 <= i * 16 + 16 &&
+                            y + 14 >= i * 16) {
 
-                        indiceMap = 2
-                        link.entrando = true
-                        setTimeout(() => {
-                            link.entrando = false
-                        }, 100)
-                        console.log('entrada');
+                            indiceMap = 2
+                            link.entrando = true
+                            setTimeout(() => {
+                                link.entrando = false
+                            }, 100)
+                            console.log('entrada');
+                        }
                     }
-                }
-                // VOLVER DE LA PANTALLA 3 A LA 0
-                else if (indiceMap === 2 && map[i][j] === 0) {
-                    if (x <= j * 16 + 12 &&
-                        x + 12 >= j * 16 &&
-                        y + 10 <= i * 16 + 16 &&
-                        y + 14 >= i * 16) {
+                    // VOLVER DE LA PANTALLA 3 A LA 0
+                    else if (indiceMap === 2 && map[i][j] === 0) {
+                        if (x <= j * 16 + 12 &&
+                            x + 12 >= j * 16 &&
+                            y + 10 <= i * 16 + 16 &&
+                            y + 14 >= i * 16) {
 
-                        indiceMap = 0
-                        link.entrando = true
-                        setTimeout(() => {
-                            link.entrando = false
-                        }, 100)
-                        console.log('entrada');
+                            indiceMap = 0
+                            link.entrando = true
+                            setTimeout(() => {
+                                link.entrando = false
+                            }, 100)
+                            console.log('entrada');
+                        }
                     }
                 }
 
                 //COLISIONES CON EL RESTO DEL MAPA
-                if (map[i][j] != 2 && map[i][j] != 28 && map[i][j] != 34) {
+                if (map[i][j] != 2 && map[i][j] != 34) {
                     if (x <= j * 16 + 12 &&
                         x + 12 >= j * 16 &&
                         y + 10 <= i * 16 + 16 &&
@@ -632,7 +785,6 @@ window.onload = () => {
         }
         return false;
     }
-
 
     function activaMovimiento(evt) {
 
