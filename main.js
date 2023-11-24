@@ -17,7 +17,7 @@ window.onload = () => {
 
 
 
-    let link = new Player(90, 125, true)
+    let link = new Player(90, 125, true, ctx)
     let oldLinkX, oldLinkY
 
     let octoroks = []
@@ -38,7 +38,14 @@ window.onload = () => {
     document.addEventListener('keydown', activaMovimiento, false)
     document.addEventListener('keyup', desactivaMovimiento, false)
 
-    function Player(x, y, col) {
+
+
+
+
+
+
+    function Player(x, y, col, context) {
+
         this.x = x
         this.y = y
         this.tileSize = 16
@@ -123,6 +130,51 @@ window.onload = () => {
             return crash;
         }
 
+
+        this.recibirDanio = function () {
+            if (!this.parpadeando) {
+                this.vida -= 10;
+                this.parpadear();
+            }
+        }
+        //FUNCIONES PARA PARPADEAR CUANDO RECIBE DAÑO
+        this.parpadeando = false
+        this.context = context;
+
+        this.parpadear = function () {
+            this.parpadeando = true;
+            const parpadeoInterval = setInterval(() => {
+                // Alterna la visibilidad
+                if (this.isVisible()) {
+                    this.context.globalAlpha = 0;
+                    this.pintarJugador();
+                } else {
+                    this.context.globalAlpha = 1;
+                    this.pintarJugador;
+                }
+
+                setTimeout(() => {
+                    this.context.globalAlpha = 1;
+                    this.parpadeando = false;
+                    clearInterval(parpadeoInterval);
+                }, 1000);
+
+            }, 200);
+        }
+
+        this.isVisible = function () {
+            return this.context.globalAlpha > 0;
+        }
+
+
+        this.recibirDanio = function () {
+            if (!this.parpadeando) {
+                this.vida--;
+                link.kinematic = true
+                this.parpadear();
+            }
+        }
+        
     }
 
 
@@ -154,7 +206,7 @@ window.onload = () => {
             );
 
         }
-        if(link.col){
+        if (link.col) {
             ctx.strokeStyle = "green";
             ctx.strokeRect(this.x, this.y, this.tamañoX, this.tamañoY);
         }
@@ -213,15 +265,15 @@ window.onload = () => {
                 this.tamañoEspadaXX = 0
                 this.tamañoEspadaYY = 0
 
-                link.espada.x = link.x + 7
+                link.espada.x = link.x
                 link.espada.y = link.y + 16
-                link.espada.tamañoX = 3
+                link.espada.tamañoX = 16
                 link.espada.tamañoY = 11
-                if(link.col){
+                if (link.col) {
                     ctx.strokeStyle = "green";
                     ctx.strokeRect(link.espada.x, link.espada.y, link.espada.tamañoX, link.espada.tamañoY);
                 }
-                
+
 
                 this.posicionAtaque = 0
             }
@@ -233,12 +285,12 @@ window.onload = () => {
                 this.tamañoEspadaYY = 0
 
                 link.espada.x = link.x - 10
-                link.espada.y = link.y + 7
+                link.espada.y = link.y
                 link.espada.tamañoX = 11
-                link.espada.tamañoY = 3
+                link.espada.tamañoY = 16
 
 
-                if(link.col){
+                if (link.col) {
                     ctx.strokeStyle = "green";
                     ctx.strokeRect(link.espada.x, link.espada.y, link.espada.tamañoX, link.espada.tamañoY);
                 }
@@ -253,11 +305,11 @@ window.onload = () => {
                 this.tamañoEspadaYY = 0
 
                 link.espada.x = link.x + 16
-                link.espada.y = link.y + 7
+                link.espada.y = link.y
                 link.espada.tamañoX = 11
-                link.espada.tamañoY = 3
+                link.espada.tamañoY = 16
 
-                if(link.col){
+                if (link.col) {
                     ctx.strokeStyle = "green";
                     ctx.strokeRect(link.espada.x, link.espada.y, link.espada.tamañoX, link.espada.tamañoY);
                 }
@@ -271,12 +323,12 @@ window.onload = () => {
                 this.tamañoEspadaYY = 14
                 this.tamañoEspadaY = 13
 
-                link.espada.x = link.x + 6
-                link.espada.y = link.y - 12
-                link.espada.tamañoX = 3
-                link.espada.tamañoY = 13
+                link.espada.x = link.x
+                link.espada.y = link.y - 14
+                link.espada.tamañoX = 16
+                link.espada.tamañoY = 15
 
-                if(link.col){
+                if (link.col) {
                     ctx.strokeStyle = "green";
                     ctx.strokeRect(link.espada.x, link.espada.y, link.espada.tamañoX, link.espada.tamañoY);
                 }
@@ -350,6 +402,9 @@ window.onload = () => {
         this.inicial = 0
         this.posicion = 0;
 
+        this.colXTocada = false;
+        this.colYTocada = false;
+
         this.animacionEnemigo = animacionArr
 
         this.isMoving = false
@@ -363,6 +418,10 @@ window.onload = () => {
     Enemigo.prototype.imagen = imagen
 
     Enemigo.prototype.pintarEnemigo = function () {
+        ctx.save()
+        ctx.globalAlpha = 1;
+
+
         ctx.drawImage(this.imagen, // Imagen completa con todos los comecocos (Sprite)
             this.animacionEnemigo[this.posicion][0],    // posicion X del sprite donde se encuentra el comecocos que voy a recortar del sprite para dibujar
             this.animacionEnemigo[this.posicion][1],	  // Posicion Y del sprite donde se encuentra el comecocos que voy a recortar del sprite para dibujar
@@ -372,17 +431,56 @@ window.onload = () => {
             this.y,				   // Posicion y de pantalla donde voy a dibujar el comecocos recortado
             this.tamañoX,		   // Tamaño X del comecocos que voy a dibujar
             this.tamañoY);
-            
-            ctx.strokeStyle = "red";
-            ctx.strokeRect(this.x, this.y, this.tamañoX, this.tamañoY);
+
+        ctx.strokeStyle = "red";
+        ctx.strokeRect(this.x, this.y, this.tamañoX, this.tamañoY);
+
+        ctx.restore()
     }
 
+    let xRan = 0, yRan = 0
+    let ran = true;
+
     Enemigo.prototype.moverEnemigo = function () {
+        //ABAJO -> Y + VELOCIDAD
+        //ARRIBA -> Y - VELOCIDAD
+        //DERECHA -> X + VELOCIDAD
+        //IZQUIERDA -> X - VELOCIDAD
+
+        xRan = Math.floor(Math.random() * 2);
+        yRan = Math.floor(Math.random() * 2);
 
         this.isMoving = true
-        if (!collision(this.x, this.y + this.velocidad, overworld[indiceMap], false)) {
-            this.y += this.velocidad
+
+        if (xRan === 1 && yRan === 0) {
+            if (!collision(this.x + this.velocidad, this.y, overworld[indiceMap], false) && !this.colXTocada) {
+                this.x += this.velocidad
+                this.inicial = 6
+            }
+            else if (!collision(this.x - this.velocidad, this.y, overworld[indiceMap], false)) {
+                this.colXTocada = true
+                this.x -= this.velocidad
+                this.inicial = 2
+            }
+            else {
+                this.colXTocada = false;
+            }
         }
+        else {
+            if (!collision(this.x, this.y + this.velocidad, overworld[indiceMap], false) && !this.colYTocada) {
+                this.y += this.velocidad
+                this.inicial = 0
+            }
+            else if (!collision(this.x, this.y - this.velocidad, overworld[indiceMap], false)) {
+                this.colYTocada = true
+                this.y -= this.velocidad
+                this.inicial = 4
+            }
+            else {
+                this.colYTocada = false
+            }
+        }
+
 
         // this.y += this.velocidad
         // if (this.y > ALTOCANVAS) {
@@ -395,7 +493,6 @@ window.onload = () => {
 
         if (indiceMap === 2) {
             if (!isGenerate) {
-
                 let octorok = new Enemigo(50, 100, 1, animacionArr = [
                     [0, 0], [0, 30],//ABAJO
                     [31, 0], [31, 30],//IZQUIERDA
@@ -421,10 +518,14 @@ window.onload = () => {
                 isGenerate = true;
             }
 
+
+
             for (let i = 0; i < octoroks.length; i++) {
                 octoroks[i].pintarEnemigo()
                 octoroks[i].moverEnemigo()
             }
+
+
 
         }
         else {
@@ -432,7 +533,6 @@ window.onload = () => {
             isGenerate = false;
         }
     }
-
 
     let overworld = [
         [
@@ -487,7 +587,7 @@ window.onload = () => {
             [61, 61, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 61, 61],
             [61, 61, 2, 2, 2, 2, 3, 4, 4, 5, 2, 2, 2, 2, 61, 61],
             [61, 61, 2, 2, 2, 20, 21, 28, 28, 23, 20, 2, 2, 2, 61, 61],
-            [61, 61, 1, 2, 1, 2, 2, 2, 2, 2, 2, 1, 2, 1, 61, 61],
+            [61, 61, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 61, 61],
             [61, 61, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 61, 61],
             [61, 61, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 61, 61],
             [61, 61, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 61, 61],
@@ -505,7 +605,6 @@ window.onload = () => {
 
     function Draw() {
         ctx.clearRect(0, 0, ANCHOCANVAS, ALTOCANVAS);
-
         // console.log(link);
         //MAPA
         drawWorld()
@@ -524,6 +623,7 @@ window.onload = () => {
 
     }
 
+
     function checkEnemyCol() {
 
         if (link.vida === 0) {
@@ -538,26 +638,26 @@ window.onload = () => {
 
                 // NOCKBACK
                 if (link.posicion === 0 || link.posicion === 1) {
-                    link.y -= 20
+                    link.y -= 10
                 }
                 else if (link.posicion === 2 || link.posicion === 3) {
-                    link.x += 20
+                    link.x += 10
                 }
                 else if (link.posicion === 4 || link.posicion === 5) {
-                    link.x -= 20
+                    link.x -= 10
                 }
                 else if (link.posicion === 6 || link.posicion === 7) {
-                    link.y += 20
+                    link.y += 10
                 }
 
-                link.vida--;
+                link.recibirDanio()
+
                 console.log('Link VIDA: ' + link.vida);
-                link.kinematic = true
 
                 setTimeout(function () {
                     link.kinematic = false
-                }, 1000)
-                
+                }, 2000)
+
 
             }
             if (link.isAtacking && link.espada.colisiona(octorok)) {
@@ -574,7 +674,7 @@ window.onload = () => {
                     octoroks.splice(octoroks.indexOf(octorok), 1)
                 }
 
-                
+
 
             }
 
@@ -586,7 +686,8 @@ window.onload = () => {
         let hud
         hud = new Image()
         hud.src = "./Imagenes/hud.png"
-
+        ctx.save()
+        ctx.globalAlpha = 1;
         ctx.fillRect(0, 0, 256, 65)
         ctx.fillStyle = 'black'
         //HUD PRINCIPAL 256 x 56
@@ -611,18 +712,8 @@ window.onload = () => {
             64,
             40);
 
-
+        ctx.restore()
     }
-
-    //MENÚ & INVENTARIO
-    // function drawMenu(){
-    //     if(link.ubicacion === "overworld"){
-    //         drawImage()
-    //     }
-    //     if(link.ubicacion === "dungeon"){
-
-    //     }
-    // }
 
     function drawWorld() {
         ctx.save()
@@ -654,7 +745,7 @@ window.onload = () => {
 
         //CUEVA COORD
         if (link.entrando === true && indiceMap === 1) {
-            link.x = ANCHOCANVAS / 2
+            link.x = ANCHOCANVAS / 2 - 8
             link.y = ALTOCANVAS - 45
         }
         else if (link.entrando === true && indiceMap === 0) {
@@ -663,7 +754,7 @@ window.onload = () => {
         }
         //PANTALLA 3 COORD
         if (link.entrando === true && indiceMap === 2) {
-            link.x = ANCHOCANVAS / 2
+            link.x = ANCHOCANVAS / 2 - 8
             link.y = ALTOCANVAS - 30
         }
         else if (link.entrando === true && indiceMap === 0) {
