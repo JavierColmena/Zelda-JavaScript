@@ -17,7 +17,7 @@ window.onload = () => {
 
 
 
-    let link = new Player(90, 125, true, ctx)
+    let link = new Player(90, 125, false, ctx)
     let oldLinkX, oldLinkY
 
     let octoroks = []
@@ -37,11 +37,6 @@ window.onload = () => {
 
     document.addEventListener('keydown', activaMovimiento, false)
     document.addEventListener('keyup', desactivaMovimiento, false)
-
-
-
-
-
 
 
     function Player(x, y, col, context) {
@@ -174,7 +169,7 @@ window.onload = () => {
                 this.parpadear();
             }
         }
-        
+
     }
 
 
@@ -407,9 +402,11 @@ window.onload = () => {
 
         this.animacionEnemigo = animacionArr
 
-        this.isMoving = false
+        this.isMoving = true
 
         this.vida = vida
+
+        this.estado = 'idle'
     }
 
     imagen = new Image()
@@ -421,19 +418,38 @@ window.onload = () => {
         ctx.save()
         ctx.globalAlpha = 1;
 
+        if (this.estado === 'idle') {
+            ctx.drawImage(this.imagen, // Imagen completa con todos los comecocos (Sprite)
+                this.animacionEnemigo[this.posicion][0],    // posicion X del sprite donde se encuentra el comecocos que voy a recortar del sprite para dibujar
+                this.animacionEnemigo[this.posicion][1],	  // Posicion Y del sprite donde se encuentra el comecocos que voy a recortar del sprite para dibujar
+                this.tileSize, 		    // Tamaño X del comecocos que voy a recortar para dibujar
+                this.tileSize,	        // Tamaño Y del comecocos que voy a recortar para dibujar
+                this.x,                // Posicion x de pantalla donde voy a dibujar el comecocos recortado
+                this.y,				   // Posicion y de pantalla donde voy a dibujar el comecocos recortado
+                this.tamañoX,		   // Tamaño X del comecocos que voy a dibujar
+                this.tamañoY);
 
-        ctx.drawImage(this.imagen, // Imagen completa con todos los comecocos (Sprite)
-            this.animacionEnemigo[this.posicion][0],    // posicion X del sprite donde se encuentra el comecocos que voy a recortar del sprite para dibujar
-            this.animacionEnemigo[this.posicion][1],	  // Posicion Y del sprite donde se encuentra el comecocos que voy a recortar del sprite para dibujar
-            this.tileSize, 		    // Tamaño X del comecocos que voy a recortar para dibujar
-            this.tileSize,	        // Tamaño Y del comecocos que voy a recortar para dibujar
-            this.x,                // Posicion x de pantalla donde voy a dibujar el comecocos recortado
-            this.y,				   // Posicion y de pantalla donde voy a dibujar el comecocos recortado
-            this.tamañoX,		   // Tamaño X del comecocos que voy a dibujar
-            this.tamañoY);
+            ctx.strokeStyle = "red";
+            ctx.strokeRect(this.x, this.y, this.tamañoX, this.tamañoY);
+        }
+        if (this.estado === 'muerto') {
 
-        ctx.strokeStyle = "red";
-        ctx.strokeRect(this.x, this.y, this.tamañoX, this.tamañoY);
+            this.imagen.src = "./Imagenes/enemyDeath.png"
+
+            this.animacionEnemigo = [0, 16,32,48]
+
+            ctx.drawImage(this.imagen, // Imagen completa con todos los comecocos (Sprite)
+                this.animacionEnemigo[this.posicion],    // posicion X del sprite donde se encuentra el comecocos que voy a recortar del sprite para dibujar
+                0,	  // Posicion Y del sprite donde se encuentra el comecocos que voy a recortar del sprite para dibujar
+                this.tileSize, 		    // Tamaño X del comecocos que voy a recortar para dibujar
+                this.tileSize,	        // Tamaño Y del comecocos que voy a recortar para dibujar
+                this.x,                // Posicion x de pantalla donde voy a dibujar el comecocos recortado
+                this.y,				   // Posicion y de pantalla donde voy a dibujar el comecocos recortado
+                this.tamañoX,		   // Tamaño X del comecocos que voy a dibujar
+                this.tamañoY);
+            ctx.strokeStyle = "purple";
+            ctx.strokeRect(this.x, this.y, this.tamañoX, this.tamañoY);
+        }
 
         ctx.restore()
     }
@@ -447,39 +463,41 @@ window.onload = () => {
         //DERECHA -> X + VELOCIDAD
         //IZQUIERDA -> X - VELOCIDAD
 
-        xRan = Math.floor(Math.random() * 2);
-        yRan = Math.floor(Math.random() * 2);
-
-        this.isMoving = true
-
-        if (xRan === 1 && yRan === 0) {
-            if (!collision(this.x + this.velocidad, this.y, overworld[indiceMap], false) && !this.colXTocada) {
-                this.x += this.velocidad
-                this.inicial = 6
-            }
-            else if (!collision(this.x - this.velocidad, this.y, overworld[indiceMap], false)) {
-                this.colXTocada = true
-                this.x -= this.velocidad
-                this.inicial = 2
-            }
-            else {
-                this.colXTocada = false;
-            }
-        }
-        else {
-            if (!collision(this.x, this.y + this.velocidad, overworld[indiceMap], false) && !this.colYTocada) {
-                this.y += this.velocidad
-                this.inicial = 0
-            }
-            else if (!collision(this.x, this.y - this.velocidad, overworld[indiceMap], false)) {
-                this.colYTocada = true
-                this.y -= this.velocidad
-                this.inicial = 4
+        if(this.isMoving){
+            xRan = Math.floor(Math.random() * 2);
+            yRan = Math.floor(Math.random() * 2);
+    
+    
+            if (xRan === 1 && yRan === 0) {
+                if (!collision(this.x + this.velocidad, this.y, overworld[indiceMap], false) && !this.colXTocada) {
+                    this.x += this.velocidad
+                    this.inicial = 6
+                }
+                else if (!collision(this.x - this.velocidad, this.y, overworld[indiceMap], false)) {
+                    this.colXTocada = true
+                    this.x -= this.velocidad
+                    this.inicial = 2
+                }
+                else {
+                    this.colXTocada = false;
+                }
             }
             else {
-                this.colYTocada = false
+                if (!collision(this.x, this.y + this.velocidad, overworld[indiceMap], false) && !this.colYTocada) {
+                    this.y += this.velocidad
+                    this.inicial = 0
+                }
+                else if (!collision(this.x, this.y - this.velocidad, overworld[indiceMap], false)) {
+                    this.colYTocada = true
+                    this.y -= this.velocidad
+                    this.inicial = 4
+                }
+                else {
+                    this.colYTocada = false
+                }
             }
         }
+        
 
 
         // this.y += this.velocidad
@@ -488,6 +506,9 @@ window.onload = () => {
         // }
 
     }
+
+
+    let spawnCooldown = false
 
     function generarEnemigosPantalla(indiceMap) {
 
@@ -507,7 +528,7 @@ window.onload = () => {
                     [92, 0], [92, 30]//DERECHA
                 ], 'octorok')
                 octoroks.push(octorok)
-                octorok = new Enemigo(130, 160, 1, animacionArr = [
+                octorok = new Enemigo(130, 80, 1, animacionArr = [
                     [0, 0], [0, 30],//ABAJO
                     [31, 0], [31, 30],//IZQUIERDA
                     [64, 0], [64, 30],//ARRIBA
@@ -518,12 +539,19 @@ window.onload = () => {
                 isGenerate = true;
             }
 
+            setTimeout(function () {
+                spawnCooldown = true
+            }, 1000)
 
+            if (spawnCooldown) {
 
-            for (let i = 0; i < octoroks.length; i++) {
-                octoroks[i].pintarEnemigo()
-                octoroks[i].moverEnemigo()
+                octoroks.forEach(octorok => {
+                    octorok.pintarEnemigo()
+                    octorok.moverEnemigo()
+                });
             }
+
+
 
 
 
@@ -531,6 +559,7 @@ window.onload = () => {
         else {
             octoroks = []
             isGenerate = false;
+            spawnCooldown = false
         }
     }
 
@@ -633,6 +662,7 @@ window.onload = () => {
         }
 
         octoroks.forEach(octorok => {
+            console.log(octorok.estado);
 
             if (!(link.kinematic) && link.colisiona(octorok)) {
 
@@ -649,8 +679,9 @@ window.onload = () => {
                 else if (link.posicion === 6 || link.posicion === 7) {
                     link.y += 10
                 }
-
-                link.recibirDanio()
+                if (octorok.estado != 'muerto') {
+                    link.recibirDanio()
+                }
 
                 console.log('Link VIDA: ' + link.vida);
 
@@ -671,10 +702,16 @@ window.onload = () => {
                 console.log('OCTOROK VIDA: ' + octorok.vida);
 
                 if (octorok.vida <= 0) {
-                    octoroks.splice(octoroks.indexOf(octorok), 1)
+                    octorok.estado = 'muerto'
+
+                    // setTimeout(function(){
+                    //     octoroks.splice(octoroks.indexOf(octorok), 1)
+                    // },500)
+
+                    octorok.isMoving = false
                 }
 
-
+                console.log(octorok.isMoving);
 
             }
 
@@ -788,8 +825,11 @@ window.onload = () => {
         }
 
         octoroks.forEach(octorok => {
-            if (octorok.isMoving) {
+            if (octorok.isMoving && octorok.estado === 'idle') {
                 octorok.posicion = octorok.inicial + (octorok.posicion + 1) % 2
+            }
+            else{
+                octorok.posicion = (octorok.posicion + 1) % 4
             }
         });
     }
