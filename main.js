@@ -18,7 +18,7 @@ window.onload = () => {
 
 
 
-    let link = new Player(90, 125, true, ctx)
+    let link = new Player(90, 125, false, ctx)
     let oldLinkX, oldLinkY
 
     let octoroks = []
@@ -38,10 +38,6 @@ window.onload = () => {
 
     document.addEventListener('keydown', activaMovimiento, false)
     document.addEventListener('keyup', desactivaMovimiento, false)
-
-
-
-
 
 
 
@@ -97,8 +93,8 @@ window.onload = () => {
         ]
 
         //VIDA
-        this.maxVida = 8
-        this.vida = 1
+        this.maxVida = 3
+        this.vida = 3
 
 
         this.rupias = 0
@@ -172,7 +168,7 @@ window.onload = () => {
             if (!this.parpadeando) {
                 this.vida--;
                 link.kinematic = true
-                if(this.vida > 0){
+                if (this.vida > 0) {
                     this.parpadear();
                 }
             }
@@ -186,6 +182,7 @@ window.onload = () => {
     Player.prototype.pintarJugador = function () {
 
         if (this.estado === 'idle') {
+
             ctx.drawImage(this.imagen, // Imagen completa con todos los comecocos (Sprite)
                 this.idle[this.posicion][0],    // link.posicion X del sprite donde se encuentra el comecocos que voy a recortar del sprite para dibujar
                 this.idle[this.posicion][1],	  // link.posicion Y del sprite donde se encuentra el comecocos que voy a recortar del sprite para dibujar
@@ -492,6 +489,65 @@ window.onload = () => {
 
     }
 
+    function Item(nombre_, valor_) {
+        this.nombre = nombre_
+        this.valor = valor_
+
+        this.imagen = new Image()
+        this.imagen.src = './Imagenes/items.png'
+
+        this.dibujarItem = function (x, y) {
+            ctx.save()
+            ctx.globalAlpha = 1;
+            if (this.nombre === 'rupia') {
+                //RUPIA IMG
+                ctx.drawImage(this.imagen, // Imagen completa con todos los comecocos (Sprite)
+                    72,    // link.posicion X del sprite donde se encuentra el comecocos que voy a recortar del sprite para dibujar
+                    0,	  // link.posicion Y del sprite donde se encuentra el comecocos que voy a recortar del sprite para dibujar
+                    8, 		    // Tamaño X del comecocos que voy a recortar para dibujar
+                    16,	        // Tamaño Y del comecocos que voy a recortar para dibujar
+                    x,                // Posicion x de pantalla donde voy a dibujar el comecocos recortado
+                    y,				   // Posicion y de pantalla donde voy a dibujar el comecocos recortado
+                    8,		   // Tamaño X del comecocos que voy a dibujar
+                    16);
+            }
+            else if (this.nombre === 'corazon') {
+                //CORAZON IMG
+                ctx.drawImage(this.imagen, // Imagen completa con todos los comecocos (Sprite)
+                    0,    // Posicion X del sprite donde se encuentra el comecocos que voy a recortar del sprite para dibujar
+                    0,	  // Posicion Y del sprite donde se encuentra el comecocos que voy a recortar del sprite para dibujar
+                    8, 		    // Tamaño X del comecocos que voy a recortar para dibujar
+                    8,	        // Tamaño Y del comecocos que voy a recortar para dibujar
+                    x,                // Posicion x de pantalla donde voy a dibujar el comecocos recortado
+                    y,
+                    8,
+                    8);
+            }
+            ctx.restore()
+
+        }
+
+    }
+
+    function dropItemsController() {
+
+        let items = []
+        items.push(new Item('rupia', 5))
+        items.push(new Item('corazon', 1))
+        
+        octoroks.forEach(octorok => {
+            if(octorok.vida >= 0){
+                console.log('hola');
+                items[1].dibujarItem(octorok.x + 4, octorok.y + 4)
+            }
+        });
+
+
+    }
+
+
+
+
     function generarEnemigosPantalla(indiceMap) {
 
         if (indiceMap === 2) {
@@ -522,11 +578,10 @@ window.onload = () => {
             }
 
 
-
-            for (let i = 0; i < octoroks.length; i++) {
-                octoroks[i].pintarEnemigo()
-                octoroks[i].moverEnemigo()
-            }
+            octoroks.forEach(octorok => {
+                octorok.pintarEnemigo()
+                octorok.moverEnemigo()
+            });
 
 
 
@@ -608,7 +663,8 @@ window.onload = () => {
 
     function Draw() {
         ctx.clearRect(0, 0, ANCHOCANVAS, ALTOCANVAS);
-        // console.log(link);
+
+        link.vida = link.maxVida
         //MAPA
         drawWorld()
         checkWorldObjects()
@@ -616,13 +672,19 @@ window.onload = () => {
         link.pintarJugador()
         link.moverJugador()
         link.atacar()
+
+
         //ENEMIGOS
         generarEnemigosPantalla(indiceMap)
 
         //COMPROBAR COLISION ENE
         checkEnemyCol()
+        dropItemsController()
+
+
         //HUD
         drawHUD()
+
 
     }
 
@@ -634,11 +696,11 @@ window.onload = () => {
             clearInterval(animation)
             pantallaMuerte()
         }
-        else{
+        else {
             octoroks.forEach(octorok => {
 
                 if (!(link.kinematic) && link.colisiona(octorok)) {
-    
+
                     // NOCKBACK
                     if (link.posicion === 0 || link.posicion === 1) {
                         link.y -= 10
@@ -652,40 +714,44 @@ window.onload = () => {
                     else if (link.posicion === 6 || link.posicion === 7) {
                         link.y += 10
                     }
-    
+
                     link.recibirDanio()
-    
+
                     console.log('Link VIDA: ' + link.vida);
-    
+
                     setTimeout(function () {
                         link.kinematic = false
                     }, 2000)
-    
-    
+
+
                 }
                 if (link.isAtacking && link.espada.colisiona(octorok)) {
                     link.kinematic = true
-    
+
                     setTimeout(function () {
                         link.kinematic = false
                     }, 1000)
-    
+
                     octorok.vida--
-                    console.log('OCTOROK VIDA: ' + octorok.vida);
-    
+
+
                     if (octorok.vida <= 0) {
                         octoroks.splice(octoroks.indexOf(octorok), 1)
                     }
-    
-    
-    
+
+
+
+
+                    console.log('OCTOROK VIDA: ' + octorok.vida);
+
+
                 }
-    
-    
+
+
             });
         }
 
-        
+
     }
 
     function drawHUD() {
@@ -723,42 +789,38 @@ window.onload = () => {
         ctx.restore()
     }
 
-    function pantallaJugadores(){
-
-    }
-
     function pantallaMuerte() {
         ctx.save()
         ctx.globalAlpha = 1;
-        let muerteId = setInterval(function(){
+        let muerteId = setInterval(function () {
             ctx.clearRect(0, 0, ANCHOCANVAS, ALTOCANVAS);
 
             ctx.fillStyle = 'black'
             ctx.fillRect(0, 0, ANCHOCANVAS, ALTOCANVAS)
-    
+
             let pantallaMuerte = new Image()
             pantallaMuerte.src = './Imagenes/pantallaMuerte.png'
-    
+
             ctx.drawImage(pantallaMuerte, // Imagen completa con todos los comecocos (Sprite)
-            0,    // Posicion X del sprite donde se encuentra el comecocos que voy a recortar del sprite para dibujar
-            0,	  // Posicion Y del sprite donde se encuentra el comecocos que voy a recortar del sprite para dibujar
-            256, 		    // Tamaño X del comecocos que voy a recortar para dibujar
-            240,	        // Tamaño Y del comecocos que voy a recortar para dibujar
-            0,                // Posicion x de pantalla donde voy a dibujar el comecocos recortado
-            ALTOCANVAS / 2 - 240 / 2,
-            256,
-            240);
-    
+                0,    // Posicion X del sprite donde se encuentra el comecocos que voy a recortar del sprite para dibujar
+                0,	  // Posicion Y del sprite donde se encuentra el comecocos que voy a recortar del sprite para dibujar
+                256, 		    // Tamaño X del comecocos que voy a recortar para dibujar
+                240,	        // Tamaño Y del comecocos que voy a recortar para dibujar
+                0,                // Posicion x de pantalla donde voy a dibujar el comecocos recortado
+                ALTOCANVAS / 2 - 240 / 2,
+                256,
+                240);
+
             // ctx.font = "16px Arial"
             // ctx.fillStyle = 'yellow'
             // ctx.fillText("HAS MUERTO", (ANCHOCANVAS / 2) - 100 / 2, ALTOCANVAS / 2)
             // clearInterval(muerteId)
-        },0)
+        }, 0)
 
         ctx.restore()
 
-        
-        
+
+
 
     }
 
@@ -769,6 +831,13 @@ window.onload = () => {
         let y = 0
         //8 X 8
         //434 X 43
+
+        if (link.vida > link.maxVida) {
+            link.vida = link.maxVida
+        }
+        if (link.maxVida > 16) {
+            link.maxVida = 16
+        }
 
         //FONDO NEGRO
         ctx.fillStyle = 'black'
@@ -1007,6 +1076,10 @@ window.onload = () => {
             //ATACAR X
             case 88:
                 link.isAtacking = true;
+                break;
+            //UTILS C
+            case 67:
+
                 break;
 
         }
