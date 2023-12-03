@@ -930,8 +930,8 @@ window.onload = () => {
 
         ctx.font = '8px zeldaNes';
 
-        if (link.rupias >= 99) {
-            link.rupias = 99
+        if (link.rupias >= 15) {
+            link.rupias = 15
             ctx.fillStyle = 'greenyellow';
 
         }
