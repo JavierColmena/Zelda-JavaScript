@@ -394,10 +394,7 @@ window.onload = () => {
 
     }
 
-
     Player.prototype.imagen = imagen
-
-
 
     let xRan = 0, yRan = 0
     let spawnCooldown = false
@@ -421,6 +418,8 @@ window.onload = () => {
         this.colYTocada = false;
 
         this.randomItem = Math.floor(1 + Math.random() * 2)
+
+        this.itemGenerate = false;
 
 
         if (this.nombre === 'octorok') {
@@ -563,9 +562,6 @@ window.onload = () => {
     imagen.src = "./Imagenes/ZeldaSpriteOldMan.png"
     Personajes.prototype.imagen = imagen
 
-
-
-    console.table(items);
     let itemEnemigo = []
 
     function generarPersonajesPantalla(indiceMap) {
@@ -589,16 +585,30 @@ window.onload = () => {
             });
 
             //CHECK ITEM COL
+            let swordAp = false
             items.forEach(item => {
                 item.dibujarItem()
                 let index = items.indexOf(item)
                 if (link.colisiona(item)) {
                     if (item.nombre === 'espada') {
                         link.haveSword = true
-                        items.splice(index, 1)
                         link.estado = 'taking'
+
+                        ctx.drawImage(item.imagen, // Imagen completa con todos los comecocos (Sprite)
+                            104,    // Posicion X del sprite donde se encuentra el comecocos que voy a recortar del sprite para dibujar
+                            0,	  // Posicion Y del sprite donde se encuentra el comecocos que voy a recortar del sprite para dibujar
+                            8, 		    // Tamaño X del comecocos que voy a recortar para dibujar
+                            16,	        // Tamaño Y del comecocos que voy a recortar para dibujar
+                            link.x + 4,                // Posicion x de pantalla donde voy a dibujar el comecocos recortado
+                            link.y - 15,
+                            item.tamañoX,
+                            item.tamañoY);
+
+
+
                         link.canMove = false
                         setTimeout(function () {
+                            items.splice(index, 1)
                             link.estado = 'idle'
                             link.canMove = true
                         }, 1000)
@@ -732,15 +742,13 @@ window.onload = () => {
 
         //COMPROBAR COLISION ENE
         checkEnemyCol()
-        dropItemController()
-
+        dibujarItems()
         //HUD
         drawHUD()
 
     }
 
     function checkEnemyCol() {
-
         if (link.vida === 0) {
             clearInterval(id1)
             clearInterval(animation)
@@ -750,8 +758,6 @@ window.onload = () => {
         let enemiesToRemove = [];
 
         octoroks.forEach(octorok => {
-            console.log(octorok.estado);
-
             if (!(link.kinematic) && link.colisiona(octorok)) {
 
                 // NOCKBACK
@@ -793,13 +799,14 @@ window.onload = () => {
                     octorok.estado = 'muerto'
                     octorok.isMoving = false;
 
-
                     setTimeout(function () {
-                        if (octorok.randomItem === 1) {
+                        if (octorok.randomItem === 1 && !octorok.itemGenerate) {
                             itemEnemigo.push(new Item('rupia', 5, octorok.x, octorok.y, 8, 16))
+                            octorok.itemGenerate = true
                         }
-                        else if (octorok.randomItem === 2) {
+                        else if (octorok.randomItem === 2 && !octorok.itemGenerate) {
                             itemEnemigo.push(new Item('corazon', 1, octorok.x, octorok.y, 8, 8))
+                            octorok.itemGenerate = true
                         }
                         enemiesToRemove.push(octorok);
                     }, 200);
@@ -855,6 +862,13 @@ window.onload = () => {
         ctx.restore()
     }
 
+    function dibujarItems(){
+        itemEnemigo.forEach(item =>{
+            item.dibujarItem()
+            item.dropItemController()
+        })
+    }
+
     function Item(nombre_, valor_, x_, y_, tamañoX_, tamañoY_) {
         this.nombre = nombre_
         this.valor = valor_
@@ -896,7 +910,7 @@ window.onload = () => {
                     this.tamañoY);
             }
             else if (this.nombre === 'espada') {
-                //CORAZON IMG
+                //ESPADA IMG
                 ctx.drawImage(this.imagen, // Imagen completa con todos los comecocos (Sprite)
                     104,    // Posicion X del sprite donde se encuentra el comecocos que voy a recortar del sprite para dibujar
                     0,	  // Posicion Y del sprite donde se encuentra el comecocos que voy a recortar del sprite para dibujar
@@ -911,25 +925,23 @@ window.onload = () => {
 
         }
 
-    }
-
-    function dropItemController() {
-        if (indiceMap === 2) {
-            itemEnemigo.forEach(item => {
-                item.dibujarItem()
-                if (link.colisiona(item) && item.nombre === 'rupia') {
-                    itemEnemigo.splice(itemEnemigo.indexOf(item), 1)
-                    link.rupias += item.valor
+        Item.prototype.dropItemController = function () {
+            if (indiceMap === 2) {
+                this.dibujarItem()
+                if (link.colisiona(this) && this.nombre === 'rupia') {
+                    itemEnemigo.splice(itemEnemigo.indexOf(this), 1)
+                    link.rupias += this.valor
                 }
-                if (item.nombre === 'corazon' && link.colisiona(item)) {
-                    itemEnemigo.splice(itemEnemigo.indexOf(item), 1)
+                if (link.colisiona(this) && this.nombre === 'corazon') {
                     link.vida++
+                    itemEnemigo.splice(itemEnemigo.indexOf(this), 1)
                 }
-            });
+            }
+            else {
+                itemEnemigo = []
+            }
         }
-        else {
-            itemEnemigo = []
-        }
+
     }
 
     function healthController() {
@@ -981,11 +993,7 @@ window.onload = () => {
                     8,
                     8);
             }
-
-
         }
-
-
     }
 
     function drawWorld() {
