@@ -22,6 +22,7 @@ window.onload = () => {
 
     let octoroks = []
     let personajes = []
+    let items = []
     let isGenerate = false;
 
 
@@ -57,7 +58,7 @@ window.onload = () => {
         this.canMove = true
         this.isMoving = false
 
-        this.canAtack = true;
+        this.haveSword = false;
         this.isAtacking = false;
 
         this.ubicacion = "overworld"
@@ -94,6 +95,7 @@ window.onload = () => {
             [84, 90],//DERECHA
             [60, 84] /*ARRIBA*/
         ]
+        this.takeItem = [0, 150]
 
 
 
@@ -199,6 +201,17 @@ window.onload = () => {
                 );
 
             }
+            else if (this.estado === 'taking') {
+                ctx.drawImage(this.imagen, // Imagen completa con todos los comecocos (Sprite)
+                    this.takeItem[0],    // link.posicion X del sprite donde se encuentra el comecocos que voy a recortar del sprite para dibujar
+                    this.takeItem[1],	  // link.posicion Y del sprite donde se encuentra el comecocos que voy a recortar del sprite para dibujar
+                    this.tileSize, 		    // Tamaño X del comecocos que voy a recortar para dibujar
+                    this.tileSize,	        // Tamaño Y del comecocos que voy a recortar para dibujar
+                    this.x,                // Posicion x de pantalla donde voy a dibujar el comecocos recortado
+                    this.y,				   // Posicion y de pantalla donde voy a dibujar el comecocos recortado
+                    this.tamañoX,		   // Tamaño X del comecocos que voy a dibujar
+                    this.tamañoY);
+            }
             if (link.col) {
                 ctx.strokeStyle = "green";
                 ctx.strokeRect(this.x, this.y, this.tamañoX, this.tamañoY);
@@ -237,7 +250,7 @@ window.onload = () => {
         Player.prototype.atacar = function () {
 
 
-            if (this.canAtack && this.isAtacking) {
+            if (this.haveSword && this.isAtacking) {
                 this.estado = 'atacando'
                 this.canMove = false
                 this.kinematic = false
@@ -246,7 +259,6 @@ window.onload = () => {
                 //CREAR COL ESPADA
                 //Mitad ARRIBA ABAJO -> X:7 Y:16 TamañoX: 3 TamañoY: 11
                 //Mitad IZQUIERDA DERECHA -> X:7 Y:16 TamañoX: 11 TamañoY: 3
-
 
 
                 //ACTUALIZAR ESPADA TAMAÑO IMAGEN
@@ -388,7 +400,6 @@ window.onload = () => {
 
 
     let xRan = 0, yRan = 0
-    let ran = true;
     let spawnCooldown = false
 
     function Enemigo(x, y, vida = 1, nombre) {
@@ -408,12 +419,16 @@ window.onload = () => {
 
         this.colXTocada = false;
         this.colYTocada = false;
+
+        this.randomItem = Math.floor(1 + Math.random() * 2)
+
+
         if (this.nombre === 'octorok') {
             this.animacionEnemigo = [
                 [0, 0], [0, 30],//ABAJO
                 [31, 0], [31, 30],//IZQUIERDA
-                [64, 0], [64, 30],//ARRIBA
-                [92, 0], [92, 30]//DERECHA
+                [60, 0], [60, 30],//ARRIBA
+                [90, 0], [90, 30]//DERECHA
             ]
         }
 
@@ -549,26 +564,60 @@ window.onload = () => {
     Personajes.prototype.imagen = imagen
 
 
+
+    console.table(items);
+    let itemEnemigo = []
+
     function generarPersonajesPantalla(indiceMap) {
         if (indiceMap === 1) {
             if (!isGenerate) {
 
-                let oldMan = new Personajes(CANVAS.width / 2 - 8, CANVAS.height / 2, 'oldman')
-                personajes.push(oldMan)
+                let personaje = new Personajes(CANVAS.width / 2 - 8, CANVAS.height / 2, 'oldman')
+                personajes.push(personaje)
 
-                personajes.forEach(personaje => {
-                    personaje.pintarPersonaje()
-                });
+                if (!link.haveSword) {
+                    let item = new Item('espada', 0, CANVAS.width / 2 - 4, CANVAS.height / 2 + 30, 8, 16)
+                    items.push(item)
+                }
 
                 isGenerate = true;
             }
+
+
+            personajes.forEach(personaje => {
+                personaje.pintarPersonaje()
+            });
+
+            //CHECK ITEM COL
+            items.forEach(item => {
+                item.dibujarItem()
+                let index = items.indexOf(item)
+                if (link.colisiona(item)) {
+                    if (item.nombre === 'espada') {
+                        link.haveSword = true
+                        items.splice(index, 1)
+                        link.estado = 'taking'
+                        link.canMove = false
+                        setTimeout(function () {
+                            link.estado = 'idle'
+                            link.canMove = true
+                        }, 1000)
+                    }
+                }
+            });
+
+
         }
-        if (indiceMap === 2) {
+        else if (indiceMap === 2) {
             if (!isGenerate) {
+                link.canMove = false
+
                 let octorok = new Enemigo(50, 100, 1, 'octorok')
                 octoroks.push(octorok)
+
                 octorok = new Enemigo(190, 160, 1, 'octorok')
                 octoroks.push(octorok)
+
                 octorok = new Enemigo(130, 80, 1, 'octorok')
                 octoroks.push(octorok)
 
@@ -576,6 +625,7 @@ window.onload = () => {
             }
 
             setTimeout(function () {
+                link.canMove = true
                 spawnCooldown = true
             }, 1000)
 
@@ -589,6 +639,8 @@ window.onload = () => {
         }
         else {
             octoroks = []
+            personajes = []
+            items = []
             isGenerate = false;
             spawnCooldown = false
         }
@@ -678,9 +730,10 @@ window.onload = () => {
         link.moverJugador()
         link.atacar()
 
-
         //COMPROBAR COLISION ENE
         checkEnemyCol()
+        dropItemController()
+
         //HUD
         drawHUD()
 
@@ -740,7 +793,14 @@ window.onload = () => {
                     octorok.estado = 'muerto'
                     octorok.isMoving = false;
 
+
                     setTimeout(function () {
+                        if (octorok.randomItem === 1) {
+                            itemEnemigo.push(new Item('rupia', 5, octorok.x, octorok.y, 8, 16))
+                        }
+                        else if (octorok.randomItem === 2) {
+                            itemEnemigo.push(new Item('corazon', 1, octorok.x, octorok.y, 8, 8))
+                        }
                         enemiesToRemove.push(octorok);
                     }, 200);
                 }
@@ -795,14 +855,20 @@ window.onload = () => {
         ctx.restore()
     }
 
-    function Item(nombre_, valor_) {
+    function Item(nombre_, valor_, x_, y_, tamañoX_, tamañoY_) {
         this.nombre = nombre_
         this.valor = valor_
+
+        this.x = x_
+        this.y = y_
+
+        this.tamañoX = tamañoX_
+        this.tamañoY = tamañoY_
 
         this.imagen = new Image()
         this.imagen.src = './Imagenes/items.png'
 
-        this.dibujarItem = function (x, y) {
+        Item.prototype.dibujarItem = function () {
             ctx.save()
             ctx.globalAlpha = 1;
             if (this.nombre === 'rupia') {
@@ -812,10 +878,10 @@ window.onload = () => {
                     0,	  // link.posicion Y del sprite donde se encuentra el comecocos que voy a recortar del sprite para dibujar
                     8, 		    // Tamaño X del comecocos que voy a recortar para dibujar
                     16,	        // Tamaño Y del comecocos que voy a recortar para dibujar
-                    x,                // Posicion x de pantalla donde voy a dibujar el comecocos recortado
-                    y,				   // Posicion y de pantalla donde voy a dibujar el comecocos recortado
-                    8,		   // Tamaño X del comecocos que voy a dibujar
-                    16);
+                    this.x,                // Posicion x de pantalla donde voy a dibujar el comecocos recortado
+                    this.y,				   // Posicion y de pantalla donde voy a dibujar el comecocos recortado
+                    this.tamañoX,
+                    this.tamañoY);
             }
             else if (this.nombre === 'corazon') {
                 //CORAZON IMG
@@ -824,10 +890,22 @@ window.onload = () => {
                     0,	  // Posicion Y del sprite donde se encuentra el comecocos que voy a recortar del sprite para dibujar
                     8, 		    // Tamaño X del comecocos que voy a recortar para dibujar
                     8,	        // Tamaño Y del comecocos que voy a recortar para dibujar
-                    x,                // Posicion x de pantalla donde voy a dibujar el comecocos recortado
-                    y,
-                    8,
-                    8);
+                    this.x,                // Posicion x de pantalla donde voy a dibujar el comecocos recortado
+                    this.y,
+                    this.tamañoX,
+                    this.tamañoY);
+            }
+            else if (this.nombre === 'espada') {
+                //CORAZON IMG
+                ctx.drawImage(this.imagen, // Imagen completa con todos los comecocos (Sprite)
+                    104,    // Posicion X del sprite donde se encuentra el comecocos que voy a recortar del sprite para dibujar
+                    0,	  // Posicion Y del sprite donde se encuentra el comecocos que voy a recortar del sprite para dibujar
+                    8, 		    // Tamaño X del comecocos que voy a recortar para dibujar
+                    16,	        // Tamaño Y del comecocos que voy a recortar para dibujar
+                    this.x,                // Posicion x de pantalla donde voy a dibujar el comecocos recortado
+                    this.y,
+                    this.tamañoX,
+                    this.tamañoY);
             }
             ctx.restore()
 
@@ -835,20 +913,23 @@ window.onload = () => {
 
     }
 
-    function dropItemsController() {
-
-        let items = []
-        items.push(new Item('rupia', 5))
-        items.push(new Item('corazon', 1))
-
-        octoroks.forEach(octorok => {
-            if (octorok.vida >= 0) {
-                console.log('hola');
-                items[1].dibujarItem(octorok.x + 4, octorok.y + 4)
-            }
-        });
-
-
+    function dropItemController() {
+        if (indiceMap === 2) {
+            itemEnemigo.forEach(item => {
+                item.dibujarItem()
+                if (link.colisiona(item) && item.nombre === 'rupia') {
+                    itemEnemigo.splice(itemEnemigo.indexOf(item), 1)
+                    link.rupias += item.valor
+                }
+                if (item.nombre === 'corazon' && link.colisiona(item)) {
+                    itemEnemigo.splice(itemEnemigo.indexOf(item), 1)
+                    link.vida++
+                }
+            });
+        }
+        else {
+            itemEnemigo = []
+        }
     }
 
     function healthController() {
