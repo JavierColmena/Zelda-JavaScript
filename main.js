@@ -43,11 +43,28 @@ window.onload = () => {
 
     //AUDIO
     let corazonSnd = document.getElementById('corazonSnd')
-    let hurtSnd = document.getElementById('hurtSnd')
-    let itemSnd = document.getElementById('itemSnd')
-    let overworldSnd = document.getElementById('overworldSnd')
-    let rupeeSnd = document.getElementById('rupeeSnd')
+    corazonSnd.volume = 0.5
 
+    let hurtSnd = document.getElementById('hurtSnd')
+    hurtSnd.volume = 0.5
+
+    let itemSnd = document.getElementById('itemSnd')
+    itemSnd.volume = 0.3
+
+    let overworldSnd = document.getElementById('overworldSnd')
+    overworldSnd.volume = 0.3
+
+    let rupeeSnd = document.getElementById('rupeeSnd')
+    rupeeSnd.volume = 0.5
+
+    let swordSnd = document.getElementById('swordSnd')
+    swordSnd.volume = 0.8
+
+    let caveSnd = document.getElementById('caveSnd')
+    caveSnd.volume = 0.3
+
+    let enemySnd = document.getElementById('enemySnd')
+    enemySnd.volume = 0.5
 
     function Player(x, y, col, context) {
 
@@ -114,6 +131,9 @@ window.onload = () => {
         this.kinematic = false;
         this.col = col
 
+        // corte
+        this.itemUsing = [new Item('', 0, 0, 0)
+            , new Item('bomba', 0, 0, 0)]
 
 
         //COLISIONES PARA ENEMIGOS
@@ -178,7 +198,7 @@ window.onload = () => {
         this.recibirDanio = function () {
             if (!this.parpadeando) {
                 hurtSnd.currentTime = 0
-                hurtSnd.volume = 0.2
+
                 hurtSnd.play()
                 this.vida--;
                 link.kinematic = true
@@ -353,7 +373,12 @@ window.onload = () => {
                 }
 
 
+                swordSnd.play()
+
+
                 setTimeout(() => {
+                    swordSnd.currentTime = 0
+
                     this.estado = 'idle'
                     this.canMove = true
                     this.isAtacking = false
@@ -602,7 +627,7 @@ window.onload = () => {
                 let index = items.indexOf(item)
                 if (link.colisiona(item)) {
                     if (item.nombre === 'espada') {
-                        itemSnd.volume = 0.2
+                        link.itemUsing[0].nombre = 'espada'
                         itemSnd.play()
 
 
@@ -740,7 +765,6 @@ window.onload = () => {
     imagen = new Image()
     imagen.src = "./Images/tiles-overworld.png"
 
-    console.table(link.idle);
 
     function Draw() {
         ctx.clearRect(0, 0, ANCHOCANVAS, ALTOCANVAS);
@@ -767,6 +791,11 @@ window.onload = () => {
 
     function checkEnemyCol() {
         if (link.vida === 0) {
+            overworldSnd.pause()
+            caveSnd.pause()
+            enemySnd.pause()
+
+
             clearInterval(id1)
             clearInterval(animation)
             console.log('Has muerto')
@@ -794,7 +823,7 @@ window.onload = () => {
                     link.recibirDanio()
                 }
 
-                console.log('Link VIDA: ' + link.vida);
+                // console.log('Link VIDA: ' + link.vida);
 
                 setTimeout(function () {
                     link.kinematic = false
@@ -825,9 +854,10 @@ window.onload = () => {
                             octorok.itemGenerate = true
                         }
                         enemiesToRemove.push(octorok);
+                        enemySnd.play()
                     }, 200);
                 }
-                console.log('OCTOROK VIDA: ' + octorok.vida);
+                // console.log('OCTOROK VIDA: ' + octorok.vida);
 
 
             }
@@ -875,13 +905,149 @@ window.onload = () => {
             64,
             40);
 
+        //HELTH COUNT
         healthController()
+        //RUPEE COUNT
+        rupeeController()
+        //KEY COUNT
+        keyController()
+        //BOMBS COUNT
+        bombController()
+
+        //ITEMS
+        ItemsHUD()
 
         ctx.restore()
     }
 
-    function ItemController(){
-        itemEnemigo.forEach(item =>{
+    function rupeeController() {
+
+        let x = 96, y = 23
+
+        //Fondo negro
+        ctx.fillStyle = 'black'
+        ctx.fillRect(x, y - 7, 8 * 3, 8)
+
+        ctx.font = '8px zeldaNes';
+
+        if (link.rupias >= 99) {
+            link.rupias = 99
+            ctx.fillStyle = 'greenyellow';
+
+        }
+        else {
+            ctx.fillStyle = 'white';
+        }
+        if (link.rupias < 0) {
+            link.rupias = 0
+        }
+
+        if (link.rupias >= 10) {
+            ctx.fillText('X' + link.rupias, x, y);
+        }
+        else {
+            ctx.fillText('X0' + link.rupias, x, y);
+        }
+
+
+
+    }
+    function keyController() {
+
+        let x = 96, y = 23 + 16
+
+        //Fondo negro
+        ctx.fillStyle = 'black'
+        ctx.fillRect(x, y - 7, 8 * 3, 8)
+
+        ctx.font = '8px zeldaNes';
+
+        if (link.llaves >= 99) {
+            link.llaves = 99
+            ctx.fillStyle = 'greenyellow';
+
+        }
+        else {
+            ctx.fillStyle = 'white';
+        }
+        if (link.llaves < 0) {
+            link.llaves = 0
+        }
+
+        if (link.llaves >= 10) {
+            ctx.fillText('X' + link.llaves, x, y);
+        }
+        else {
+            ctx.fillText('X0' + link.llaves, x, y);
+        }
+
+
+
+    }
+    function bombController() {
+
+        let x = 96, y = 23 + 16 + 8
+
+        //Fondo negro
+        ctx.fillStyle = 'black'
+        ctx.fillRect(x, y - 7, 8 * 3, 8)
+
+        ctx.font = '8px zeldaNes';
+
+        if (link.bombas >= 99) {
+            link.bombas = 99
+            ctx.fillStyle = 'greenyellow';
+
+        }
+        else {
+            ctx.fillStyle = 'white';
+        }
+        if (link.bombas < 0) {
+            link.bombas = 0
+        }
+
+        if (link.bombas >= 10) {
+            ctx.fillText('X' + link.bombas, x, y);
+        }
+        else {
+            ctx.fillText('X0' + link.bombas, x, y);
+        }
+
+
+
+    }
+
+    function ItemsHUD() {
+        //Y1: 24 X1:128
+        //TAMAÑOX: 8 TAMAÑOY: 16
+
+        //Y2: 24 X2:152
+
+
+        link.itemUsing[0].x = 128
+        link.itemUsing[0].y = 24
+        link.itemUsing[0].tamañoX = 8
+        link.itemUsing[0].tamañoY = 16
+
+        link.itemUsing[1].x = 152
+        link.itemUsing[1].y = 24
+        link.itemUsing[1].tamañoX = 8
+        link.itemUsing[1].tamañoY = 16
+
+        ctx.fillStyle = 'black'
+        ctx.fillRect(link.itemUsing[0].x, link.itemUsing[0].y, link.itemUsing[0].tamañoX, link.itemUsing[0].tamañoY)
+
+        ctx.fillStyle = 'black'
+        ctx.fillRect(link.itemUsing[1].x, link.itemUsing[1].y, link.itemUsing[1].tamañoX, link.itemUsing[1].tamañoY)
+
+        link.itemUsing[0].dibujarItem()
+        link.itemUsing[1].dibujarItem()
+
+
+    }
+
+    function ItemController() {
+        itemEnemigo.forEach(item => {
             item.dibujarItem()
             item.dropItemController()
         })
@@ -939,6 +1105,18 @@ window.onload = () => {
                     this.tamañoX,
                     this.tamañoY);
             }
+            else if (this.nombre === 'bomba') {
+                //BOMBA IMG
+                ctx.drawImage(this.imagen, // Imagen completa con todos los comecocos (Sprite)
+                    136,    // Posicion X del sprite donde se encuentra el comecocos que voy a recortar del sprite para dibujar
+                    0,	  // Posicion Y del sprite donde se encuentra el comecocos que voy a recortar del sprite para dibujar
+                    8, 		    // Tamaño X del comecocos que voy a recortar para dibujar
+                    16,	        // Tamaño Y del comecocos que voy a recortar para dibujar
+                    this.x,                // Posicion x de pantalla donde voy a dibujar el comecocos recortado
+                    this.y,
+                    this.tamañoX,
+                    this.tamañoY);
+            }
             ctx.restore()
 
         }
@@ -948,16 +1126,16 @@ window.onload = () => {
                 this.dibujarItem()
                 if (link.colisiona(this) && this.nombre === 'rupia') {
                     rupeeSnd.currentTime = 0
-                    rupeeSnd.volume = .2
+
                     rupeeSnd.play()
 
                     link.rupias += this.valor
+                    // console.log(link.rupias);
                     itemEnemigo.splice(itemEnemigo.indexOf(this), 1)
 
                 }
                 if (link.colisiona(this) && this.nombre === 'corazon') {
                     corazonSnd.currentTime = 0
-                    corazonSnd.volume = .2
 
                     corazonSnd.play()
                     link.vida++
@@ -1038,12 +1216,15 @@ window.onload = () => {
         switch (indiceMap) {
             case 0:
             case 2:
+                caveSnd.currentTime = 0
                 overworldSnd.play()
                 link.ubicacion = 'overworld'
                 break;
             case 1:
                 overworldSnd.currentTime = 0
                 overworldSnd.pause()
+
+                caveSnd.play()
 
                 link.ubicacion = 'cueva'
                 break;
@@ -1142,7 +1323,7 @@ window.onload = () => {
                             setTimeout(() => {
                                 link.entrando = false
                             }, 100)
-                            console.log('entrada');
+                            console.log('Salida');
                         }
                     }
 

@@ -1,9 +1,16 @@
-body{
+@font-face {
+    font-family: 'zeldaNes';
+    src: url('../the-legend-of-zelda-nes.ttf') format('truetype');
+    /* Ajusta la ruta y el formato según la fuente que estés utilizando */
+}
+body {
     display: flex;
     align-items: center;
     justify-content: center;
     background-color: black;
+
 }
-canvas{
+
+canvas {
     image-rendering: pixelated;
 }
