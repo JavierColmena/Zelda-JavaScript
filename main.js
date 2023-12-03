@@ -793,12 +793,11 @@ window.onload = () => {
                 }, 1000)
 
                 octorok.vida--
-                console.log('OCTOROK VIDA: ' + octorok.vida);
 
                 if (octorok.vida <= 0) {
                     octorok.estado = 'muerto'
                     octorok.isMoving = false;
-
+                    octorok.vida = 0
                     setTimeout(function () {
                         if (octorok.randomItem === 1 && !octorok.itemGenerate) {
                             itemEnemigo.push(new Item('rupia', 5, octorok.x, octorok.y, 8, 16))
@@ -811,6 +810,8 @@ window.onload = () => {
                         enemiesToRemove.push(octorok);
                     }, 200);
                 }
+                console.log('OCTOROK VIDA: ' + octorok.vida);
+
 
             }
 
