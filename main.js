@@ -32,13 +32,19 @@ window.onload = () => {
     let indiceMap = 0
 
     imagen = new Image()
-    imagen.src = "./Imagenes/link.png"
+    imagen.src = "./Images/link.png"
 
     id1 = setInterval(Draw, 1000 / 60)
     animation = setInterval(animacionPersonajes, 1000 / 10)
 
     document.addEventListener('keydown', activaMovimiento, false)
     document.addEventListener('keyup', desactivaMovimiento, false)
+
+
+    //AUDIO
+    let corazonSnd = document.getElementById('corazonSnd')
+    let hurtSnd = document.getElementById('hurtSnd')
+    let itemSnd = document.getElementById('itemSnd')
 
 
     function Player(x, y, col, context) {
@@ -169,6 +175,9 @@ window.onload = () => {
 
         this.recibirDanio = function () {
             if (!this.parpadeando) {
+                hurtSnd.currentTime = 0
+                hurtSnd.volume = 0.2
+                hurtSnd.play()
                 this.vida--;
                 link.kinematic = true
                 this.parpadear();
@@ -457,7 +466,7 @@ window.onload = () => {
             }
             if (this.estado === 'muerto') {
                 this.imagen = new Image()
-                this.imagen.src = "./Imagenes/enemyDeath.png"
+                this.imagen.src = "./Images/enemyDeath.png"
 
                 this.animacionEnemigo = [0, 16, 32, 48]
 
@@ -529,7 +538,7 @@ window.onload = () => {
     }
 
     imagen = new Image()
-    imagen.src = "./Imagenes/enemies.png"
+    imagen.src = "./Images/enemies.png"
 
     Enemigo.prototype.imagen = imagen
 
@@ -559,7 +568,7 @@ window.onload = () => {
     }
 
     imagen = new Image()
-    imagen.src = "./Imagenes/ZeldaSpriteOldMan.png"
+    imagen.src = "./Images/ZeldaSpriteOldMan.png"
     Personajes.prototype.imagen = imagen
 
     let itemEnemigo = []
@@ -591,8 +600,14 @@ window.onload = () => {
                 let index = items.indexOf(item)
                 if (link.colisiona(item)) {
                     if (item.nombre === 'espada') {
+                        itemSnd.volume = 0.2
+                        itemSnd.play()
+
+
+
                         link.haveSword = true
                         link.estado = 'taking'
+
 
                         ctx.drawImage(item.imagen, // Imagen completa con todos los comecocos (Sprite)
                             104,    // Posicion X del sprite donde se encuentra el comecocos que voy a recortar del sprite para dibujar
@@ -611,7 +626,7 @@ window.onload = () => {
                             items.splice(index, 1)
                             link.estado = 'idle'
                             link.canMove = true
-                        }, 1000)
+                        }, 1000 * itemSnd.duration)
                     }
                 }
             });
@@ -721,7 +736,7 @@ window.onload = () => {
     ]
 
     imagen = new Image()
-    imagen.src = "./Imagenes/tiles-overworld.png"
+    imagen.src = "./Images/tiles-overworld.png"
 
     console.table(link.idle);
 
@@ -742,7 +757,7 @@ window.onload = () => {
 
         //COMPROBAR COLISION ENE
         checkEnemyCol()
-        dibujarItems()
+        ItemController()
         //HUD
         drawHUD()
 
@@ -831,7 +846,7 @@ window.onload = () => {
     function drawHUD() {
         let hud
         hud = new Image()
-        hud.src = "./Imagenes/hud.png"
+        hud.src = "./Images/hud.png"
         ctx.save()
         ctx.globalAlpha = 1;
         ctx.fillRect(0, 0, 256, 65)
@@ -863,7 +878,7 @@ window.onload = () => {
         ctx.restore()
     }
 
-    function dibujarItems(){
+    function ItemController(){
         itemEnemigo.forEach(item =>{
             item.dibujarItem()
             item.dropItemController()
@@ -881,7 +896,7 @@ window.onload = () => {
         this.tamañoY = tamañoY_
 
         this.imagen = new Image()
-        this.imagen.src = './Imagenes/items.png'
+        this.imagen.src = './Images/items.png'
 
         Item.prototype.dibujarItem = function () {
             ctx.save()
@@ -934,6 +949,9 @@ window.onload = () => {
                     link.rupias += this.valor
                 }
                 if (link.colisiona(this) && this.nombre === 'corazon') {
+                    corazonSnd.currentTime = 0
+                    corazonSnd.volume = .2
+                    corazonSnd.play()
                     link.vida++
                     itemEnemigo.splice(itemEnemigo.indexOf(this), 1)
                 }
@@ -947,7 +965,7 @@ window.onload = () => {
 
     function healthController() {
         let items = new Image()
-        items.src = './Imagenes/items.png'
+        items.src = './Images/items.png'
         let x = 0
         let y = 0
         //8 X 8
