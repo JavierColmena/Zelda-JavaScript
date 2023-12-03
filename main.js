@@ -45,6 +45,8 @@ window.onload = () => {
     let corazonSnd = document.getElementById('corazonSnd')
     let hurtSnd = document.getElementById('hurtSnd')
     let itemSnd = document.getElementById('itemSnd')
+    let overworldSnd = document.getElementById('overworldSnd')
+    let rupeeSnd = document.getElementById('rupeeSnd')
 
 
     function Player(x, y, col, context) {
@@ -945,12 +947,18 @@ window.onload = () => {
             if (indiceMap === 2) {
                 this.dibujarItem()
                 if (link.colisiona(this) && this.nombre === 'rupia') {
-                    itemEnemigo.splice(itemEnemigo.indexOf(this), 1)
+                    rupeeSnd.currentTime = 0
+                    rupeeSnd.volume = .2
+                    rupeeSnd.play()
+
                     link.rupias += this.valor
+                    itemEnemigo.splice(itemEnemigo.indexOf(this), 1)
+
                 }
                 if (link.colisiona(this) && this.nombre === 'corazon') {
                     corazonSnd.currentTime = 0
                     corazonSnd.volume = .2
+
                     corazonSnd.play()
                     link.vida++
                     itemEnemigo.splice(itemEnemigo.indexOf(this), 1)
@@ -1030,9 +1038,13 @@ window.onload = () => {
         switch (indiceMap) {
             case 0:
             case 2:
+                overworldSnd.play()
                 link.ubicacion = 'overworld'
                 break;
             case 1:
+                overworldSnd.currentTime = 0
+                overworldSnd.pause()
+
                 link.ubicacion = 'cueva'
                 break;
         }
