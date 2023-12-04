@@ -127,7 +127,10 @@ window.onload = () => {
 
         this.rupias = 0
         this.llaves = 0
-        this.bombas = 0
+        this.bombas = 4
+        this.isBomb = false
+        this.bombasSoltadas = []
+        this.soltando = false
         this.kinematic = false;
         this.col = col
 
@@ -135,6 +138,29 @@ window.onload = () => {
         this.itemUsing = [new Item('', 0, 0, 0)
             , new Item('bomba', 0, 0, 0)]
 
+        Player.prototype.soltarBomba = function () {
+            //INSERTAR BOMBAS
+            if(this.isBomb && this.bombas > 0){
+                if(!this.soltando){
+                    let bomba = new Item('bomba', 1, this.x, this.y, 4,8)
+                    
+                    this.bombasSoltadas.push(bomba)
+
+                    this.bombas--
+                    this.soltando = true
+                }
+            }
+            else{
+                this.soltando = false
+            }
+            //DIBUJAR BOMBAS
+            this.bombasSoltadas.forEach(bomba => {
+                bomba.dibujarItem()
+                setTimeout(function(){
+                    bombasSoltadas.splice(1,1)
+                },1000)
+            })
+        }
 
         //COLISIONES PARA ENEMIGOS
         this.colisiona = function (otherobj) {
@@ -673,6 +699,12 @@ window.onload = () => {
                 octorok = new Enemigo(130, 80, 1, 'octorok')
                 octoroks.push(octorok)
 
+                octorok = new Enemigo(180, 100, 1, 'octorok')
+                octoroks.push(octorok)
+
+                octorok = new Enemigo(65, 100, 1, 'octorok')
+                octoroks.push(octorok)
+
                 isGenerate = true;
             }
 
@@ -780,6 +812,7 @@ window.onload = () => {
         link.pintarJugador()
         link.moverJugador()
         link.atacar()
+        link.soltarBomba()
 
         //COMPROBAR COLISION ENE
         checkEnemyCol()
@@ -1408,6 +1441,10 @@ window.onload = () => {
             case 88:
                 link.isAtacking = true;
                 break;
+            //SOLTAR BOMBA C
+            case 67:
+                link.isBomb = true;
+                break;
 
         }
 
@@ -1435,6 +1472,10 @@ window.onload = () => {
             //ATACAR X
             case 88:
                 link.isAtacking = false;
+                break;
+            //SOLTAR BOMBA C
+            case 67:
+                link.isBomb = false;
                 break;
 
         }
