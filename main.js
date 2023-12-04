@@ -134,32 +134,41 @@ window.onload = () => {
         this.kinematic = false;
         this.col = col
 
-        // corte
-        this.itemUsing = [new Item('', 0, 0, 0)
-            , new Item('bomba', 0, 0, 0)]
+        this.itemUsing = [new Item('', 0, 0, 0), new Item('bomba', 0, 0, 0)]
 
         Player.prototype.soltarBomba = function () {
             //INSERTAR BOMBAS
-            if(this.isBomb && this.bombas > 0){
-                if(!this.soltando){
-                    let bomba = new Item('bomba', 1, this.x, this.y, 4,8)
-                    
+            if (this.isBomb && this.bombas > 0) {
+                if (!this.soltando) {
+                    let bomba = new Item('bomba', 1, this.x + 4, this.y + 4, 8, 12)
+
                     this.bombasSoltadas.push(bomba)
 
                     this.bombas--
                     this.soltando = true
                 }
             }
-            else{
+            else {
                 this.soltando = false
             }
             //DIBUJAR BOMBAS
-            this.bombasSoltadas.forEach(bomba => {
-                bomba.dibujarItem()
+            this.bombasSoltadas.forEach((bomba,index) => {
+                if(!bomba.explotada){
+                    bomba.dibujarItem()
+                }
+                else{
+                    this.bombasSoltadas.splice(index,1)
+                }
                 setTimeout(function(){
-                    bombasSoltadas.splice(1,1)
+                    bomba.explotada = true
                 },1000)
             })
+
+            //CHECK BOMBAS MUNDO
+            if (this.entrando) {
+                this.bombasSoltadas = []
+            }
+
         }
 
         //COLISIONES PARA ENEMIGOS
@@ -809,10 +818,10 @@ window.onload = () => {
         generarPersonajesPantalla(indiceMap)
 
         //JUGADOR
+        link.soltarBomba()
         link.pintarJugador()
         link.moverJugador()
         link.atacar()
-        link.soltarBomba()
 
         //COMPROBAR COLISION ENE
         checkEnemyCol()
@@ -1098,6 +1107,8 @@ window.onload = () => {
 
         this.imagen = new Image()
         this.imagen.src = './Images/items.png'
+
+        this.explotada = false
 
         Item.prototype.dibujarItem = function () {
             ctx.save()
