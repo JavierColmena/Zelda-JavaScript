@@ -153,12 +153,12 @@ window.onload = () => {
             }
             //DIBUJAR BOMBAS
             this.bombasSoltadas.forEach((bomba,index) => {
-                if(!bomba.explotada){
-                    bomba.dibujarItem()
-                }
-                else{
+                bomba.dibujarItem()
+
+                if(bomba.explotada){
                     this.bombasSoltadas.splice(index,1)
                 }
+
                 setTimeout(function(){
                     bomba.explotada = true
                 },1000)
