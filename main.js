@@ -40,31 +40,36 @@ window.onload = () => {
     document.addEventListener('keydown', activaMovimiento, false)
     document.addEventListener('keyup', desactivaMovimiento, false)
 
+    let volMusica = 0.3
+    let volSfx = 0.5
 
     //AUDIO
     let corazonSnd = document.getElementById('corazonSnd')
-    corazonSnd.volume = 0.5
+    corazonSnd.volume = volSfx
 
     let hurtSnd = document.getElementById('hurtSnd')
-    hurtSnd.volume = 0.5
+    hurtSnd.volume = volSfx
 
     let itemSnd = document.getElementById('itemSnd')
-    itemSnd.volume = 0.3
+    itemSnd.volume = volMusica
 
     let overworldSnd = document.getElementById('overworldSnd')
-    overworldSnd.volume = 0.3
+    overworldSnd.volume = volMusica
 
     let rupeeSnd = document.getElementById('rupeeSnd')
-    rupeeSnd.volume = 0.5
+    rupeeSnd.volume = volSfx
 
     let swordSnd = document.getElementById('swordSnd')
-    swordSnd.volume = 0.8
+    swordSnd.volume = volSfx
 
     let caveSnd = document.getElementById('caveSnd')
-    caveSnd.volume = 0.3
+    caveSnd.volume = volMusica
 
     let enemySnd = document.getElementById('enemySnd')
-    enemySnd.volume = 0.5
+    enemySnd.volume = volSfx
+
+    let bombSnd = document.getElementById('bombSnd')
+    bombSnd.volume = volSfx
 
     function Player(x, y, col, context) {
 
@@ -123,11 +128,9 @@ window.onload = () => {
         this.takeItem = [0, 150]
 
 
-
-
         this.rupias = 0
         this.llaves = 0
-        this.bombas = 4
+        this.bombas = 20
         this.isBomb = false
         this.bombasSoltadas = []
         this.soltando = false
@@ -152,16 +155,32 @@ window.onload = () => {
                 this.soltando = false
             }
             //DIBUJAR BOMBAS
-            this.bombasSoltadas.forEach((bomba,index) => {
+            this.bombasSoltadas.forEach((bomba, index) => {
                 bomba.dibujarItem()
 
-                if(bomba.explotada){
-                    this.bombasSoltadas.splice(index,1)
+                if (bomba.explotada) {
+                    
+                        
+
+                        bombSnd.play()
+                    setTimeout(() => {
+                        this.bombasSoltadas.splice(index, 1)
+                        
+                        octoroks.forEach(octorok => {
+                            if(bomba.colisiona(octorok)){
+                                octorok.vida--
+                            }
+                        });
+                        if (bomba.colisiona(link)){
+                            link.recibirDanio()
+                            console.log('tocado');
+                        }
+                    }, 200)
                 }
 
-                setTimeout(function(){
+                setTimeout(function () {
                     bomba.explotada = true
-                },1000)
+                }, 1000)
             })
 
             //CHECK BOMBAS MUNDO
@@ -407,12 +426,11 @@ window.onload = () => {
                     this.posicionAtaque = 3
                 }
 
+                swordSnd.currentTime = 0
 
                 swordSnd.play()
 
-
                 setTimeout(() => {
-                    swordSnd.currentTime = 0
 
                     this.estado = 'idle'
                     this.canMove = true
@@ -614,6 +632,8 @@ window.onload = () => {
         this.nombre = nombre_
 
         Personajes.prototype.pintarPersonaje = function () {
+            ctx.save()
+            ctx.globalAlpha = 1;
             if (this.nombre === 'oldman') {
                 ctx.drawImage(this.imagen, // Imagen completa con todos los comecocos (Sprite)
                     0,    // link.posicion X del sprite donde se encuentra el comecocos que voy a recortar del sprite para dibujar
@@ -625,6 +645,7 @@ window.onload = () => {
                     this.tamañoX,		   // Tamaño X del comecocos que voy a dibujar
                     this.tamañoY);
             }
+            ctx.restore()
         }
 
     }
@@ -724,8 +745,14 @@ window.onload = () => {
 
             if (spawnCooldown) {
                 octoroks.forEach(octorok => {
+                    
                     octorok.pintarEnemigo()
                     octorok.moverEnemigo()
+                    link.bombasSoltadas.forEach(bomba => {
+                        if(bomba.colisiona(octorok)){
+                            octorok--
+                        }
+                    })
                 });
             }
 
@@ -1110,6 +1137,7 @@ window.onload = () => {
 
         this.explotada = false
 
+
         Item.prototype.dibujarItem = function () {
             ctx.save()
             ctx.globalAlpha = 1;
@@ -1150,19 +1178,59 @@ window.onload = () => {
                     this.tamañoY);
             }
             else if (this.nombre === 'bomba') {
+
                 //BOMBA IMG
-                ctx.drawImage(this.imagen, // Imagen completa con todos los comecocos (Sprite)
-                    136,    // Posicion X del sprite donde se encuentra el comecocos que voy a recortar del sprite para dibujar
-                    0,	  // Posicion Y del sprite donde se encuentra el comecocos que voy a recortar del sprite para dibujar
-                    8, 		    // Tamaño X del comecocos que voy a recortar para dibujar
-                    16,	        // Tamaño Y del comecocos que voy a recortar para dibujar
-                    this.x,                // Posicion x de pantalla donde voy a dibujar el comecocos recortado
-                    this.y,
-                    this.tamañoX,
-                    this.tamañoY);
+                if (!this.explotada) {
+                    ctx.drawImage(this.imagen, // Imagen completa con todos los comecocos (Sprite)
+                        136,    // Posicion X del sprite donde se encuentra el comecocos que voy a recortar del sprite para dibujar
+                        0,	  // Posicion Y del sprite donde se encuentra el comecocos que voy a recortar del sprite para dibujar
+                        8, 		    // Tamaño X del comecocos que voy a recortar para dibujar
+                        16,	        // Tamaño Y del comecocos que voy a recortar para dibujar
+                        this.x,                // Posicion x de pantalla donde voy a dibujar el comecocos recortado
+                        this.y,
+                        this.tamañoX,
+                        this.tamañoY);
+                }
+                else {
+                    this.imagen = new Image()
+                    this.imagen.src = "./Images/enemyDeath.png"
+
+                    ctx.drawImage(this.imagen, // Imagen completa con todos los comecocos (Sprite)
+                        16,    // posicion X del sprite donde se encuentra el comecocos que voy a recortar del sprite para dibujar
+                        0,	  // Posicion Y del sprite donde se encuentra el comecocos que voy a recortar del sprite para dibujar
+                        16, 		    // Tamaño X del comecocos que voy a recortar para dibujar
+                        16,	        // Tamaño Y del comecocos que voy a recortar para dibujar
+                        this.x - 2,                // Posicion x de pantalla donde voy a dibujar el comecocos recortado
+                        this.y - 1,				   // Posicion y de pantalla donde voy a dibujar el comecocos recortado
+                        16,		   // Tamaño X del comecocos que voy a dibujar
+                        16);
+                }
+
             }
             ctx.restore()
 
+        }
+
+        //COLISIONES PARA ENEMIGOS
+        Item.prototype.colisiona = function (otherobj) {
+            let left = this.x - 16;
+            let right = this.x + (this.tamañoX) + 16;
+            let top = this.y - 16;
+            let bottom = this.y + (this.tamañoY) + 16;
+
+            let objleft = otherobj.x;
+            let objright = otherobj.x + (otherobj.tamañoX);
+            let objtop = otherobj.y;
+            let objbottom = otherobj.y + (otherobj.tamañoY);
+            let crash = true;
+
+            if ((bottom < objtop) ||
+                (top > objbottom) ||
+                (right < objleft) ||
+                (left > objright)) {
+                crash = false;
+            }
+            return crash;
         }
 
         Item.prototype.dropItemController = function () {
