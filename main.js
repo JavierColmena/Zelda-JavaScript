@@ -159,22 +159,13 @@ window.onload = () => {
                 bomba.dibujarItem()
 
                 if (bomba.explotada) {
-                    
-                        
+                    bombSnd.play()
 
-                        bombSnd.play()
+                    if (this.colisiona(bomba)) {
+                        this.recibirDanio()
+                    }
                     setTimeout(() => {
                         this.bombasSoltadas.splice(index, 1)
-                        
-                        octoroks.forEach(octorok => {
-                            if(bomba.colisiona(octorok)){
-                                octorok.vida--
-                            }
-                        });
-                        if (bomba.colisiona(link)){
-                            link.recibirDanio()
-                            console.log('tocado');
-                        }
                     }, 200)
                 }
 
@@ -526,6 +517,28 @@ window.onload = () => {
 
         this.estado = 'idle'
 
+        //COLISIONES PARA ENEMIGOS
+        this.colisiona = function (otherobj) {
+            let left = this.x;
+            let right = this.x + (this.tamañoX);
+            let top = this.y;
+            let bottom = this.y + (this.tamañoY);
+
+            let objleft = otherobj.x - 16;
+            let objright = otherobj.x + (otherobj.tamañoX) + 16;
+            let objtop = otherobj.y - 16;
+            let objbottom = otherobj.y + (otherobj.tamañoY) + 16;
+            let crash = true;
+
+            if ((bottom < objtop) ||
+                (top > objbottom) ||
+                (right < objleft) ||
+                (left > objright)) {
+                crash = false;
+            }
+            return crash;
+        }
+
         Enemigo.prototype.pintarEnemigo = function () {
             ctx.save()
             ctx.globalAlpha = 1;
@@ -686,8 +699,6 @@ window.onload = () => {
                         link.itemUsing[0].nombre = 'espada'
                         itemSnd.play()
 
-
-
                         link.haveSword = true
                         link.estado = 'taking'
 
@@ -745,14 +756,10 @@ window.onload = () => {
 
             if (spawnCooldown) {
                 octoroks.forEach(octorok => {
-                    
+
                     octorok.pintarEnemigo()
                     octorok.moverEnemigo()
-                    link.bombasSoltadas.forEach(bomba => {
-                        if(bomba.colisiona(octorok)){
-                            octorok--
-                        }
-                    })
+                    
                 });
             }
 
@@ -844,6 +851,9 @@ window.onload = () => {
         //ENEMIGOS
         generarPersonajesPantalla(indiceMap)
 
+        //ELIMINAR ESTO
+        link.vida = link.maxVida
+
         //JUGADOR
         link.soltarBomba()
         link.pintarJugador()
@@ -900,6 +910,29 @@ window.onload = () => {
 
 
             }
+            link.bombasSoltadas.forEach(bomba =>{
+                if(bomba.explotada && octorok.colisiona(bomba)){
+                    octorok.vida--
+                    
+                    if (octorok.vida <= 0) {
+                        octorok.estado = 'muerto'
+                        octorok.isMoving = false;
+                        octorok.vida = 0
+                        setTimeout(function () {
+                            if (octorok.randomItem === 1 && !octorok.itemGenerate) {
+                                itemEnemigo.push(new Item('rupia', 5, octorok.x, octorok.y, 8, 16))
+                                octorok.itemGenerate = true
+                            }
+                            else if (octorok.randomItem === 2 && !octorok.itemGenerate) {
+                                itemEnemigo.push(new Item('corazon', 1, octorok.x, octorok.y, 8, 8))
+                                octorok.itemGenerate = true
+                            }
+                            enemiesToRemove.push(octorok);
+                            enemySnd.play()
+                        }, 200);
+                    }
+                }
+            })
             if (link.isAtacking && link.espada.colisiona(octorok)) {
                 link.kinematic = true
 
@@ -1211,30 +1244,9 @@ window.onload = () => {
 
         }
 
-        //COLISIONES PARA ENEMIGOS
-        Item.prototype.colisiona = function (otherobj) {
-            let left = this.x - 16;
-            let right = this.x + (this.tamañoX) + 16;
-            let top = this.y - 16;
-            let bottom = this.y + (this.tamañoY) + 16;
-
-            let objleft = otherobj.x;
-            let objright = otherobj.x + (otherobj.tamañoX);
-            let objtop = otherobj.y;
-            let objbottom = otherobj.y + (otherobj.tamañoY);
-            let crash = true;
-
-            if ((bottom < objtop) ||
-                (top > objbottom) ||
-                (right < objleft) ||
-                (left > objright)) {
-                crash = false;
-            }
-            return crash;
-        }
-
         Item.prototype.dropItemController = function () {
-            if (indiceMap === 2) {
+
+            if (indiceMap === 2 || indiceMap === 1 || indiceMap === 0) {
                 this.dibujarItem()
                 if (link.colisiona(this) && this.nombre === 'rupia') {
                     rupeeSnd.currentTime = 0
