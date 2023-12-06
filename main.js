@@ -4,7 +4,7 @@ window.onload = () => {
     const CANVAS = document.getElementById('miCanvas')
     let ctx = CANVAS.getContext('2d')
 
-    let id1, animation
+    let id1, animation, inicio
     const scale = 1 //3
     CANVAS.width = 256 * scale
     CANVAS.height = 240 * scale
@@ -13,11 +13,7 @@ window.onload = () => {
 
     let imagen
 
-    // let link = new Player(ANCHOCANVAS / 2, ALTOCANVAS / 2, true)
 
-
-
-    let link = new Player(90, 125, false, ctx)
     let oldLinkX, oldLinkY
 
     let octoroks = []
@@ -25,23 +21,32 @@ window.onload = () => {
     let items = []
     let isGenerate = false;
 
-
     let yArriba, yAbajo, xDerecha, xIzquierda
 
-
     let indiceMap = 0
+    let oldIndexMap = 0
 
     imagen = new Image()
     imagen.src = "./Images/link.png"
 
-    id1 = setInterval(Draw, 1000 / 60)
-    animation = setInterval(animacionPersonajes, 1000 / 10)
+
+    let enter = false
 
     document.addEventListener('keydown', activaMovimiento, false)
     document.addEventListener('keyup', desactivaMovimiento, false)
+    let link, nombre = 'default'
+
+    link = new Player(nombre, 90, 125, false, ctx)
+
+
+    clearInterval(inicio)
+    id1 = setInterval(Draw, 1000 / 60)
+    animation = setInterval(animacionPersonajes, 1000 / 10)
+
+
 
     let volMusica = 0.3
-    let volSfx = 0.5
+    let volSfx = 0.4
 
     //AUDIO
     let corazonSnd = document.getElementById('corazonSnd')
@@ -71,7 +76,15 @@ window.onload = () => {
     let bombSnd = document.getElementById('bombSnd')
     bombSnd.volume = volSfx
 
-    function Player(x, y, col, context) {
+    let gameOverSnd = document.getElementById('gameOverSnd')
+    gameOverSnd.volume = volMusica
+
+    let bossSnd = document.getElementById('bossSnd')
+    bossSnd.volume = volMusica
+
+    function Player(nombre_, x, y, col, context) {
+
+        this.nombre = nombre_
 
         //VIDA
         this.maxVida = 6
@@ -130,7 +143,7 @@ window.onload = () => {
 
         this.rupias = 0
         this.llaves = 0
-        this.bombas = 20
+        this.bombas = 10
         this.isBomb = false
         this.bombasSoltadas = []
         this.soltando = false
@@ -759,7 +772,7 @@ window.onload = () => {
 
                     octorok.pintarEnemigo()
                     octorok.moverEnemigo()
-                    
+
                 });
             }
 
@@ -834,51 +847,121 @@ window.onload = () => {
             [61, 61, 43, 43, 43, 43, 43, 2, 2, 43, 43, 43, 43, 43, 61, 61],
             [61, 61, 61, 61, 61, 61, 61, 2, 2, 61, 61, 61, 61, 61, 61, 61],
             [61, 61, 61, 61, 61, 61, 61, 0, 0, 61, 61, 61, 61, 61, 61, 61]
+        ],
+        [
+            //MENU
+            [22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22],
+            [22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22],
+            [22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22],
+            [22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22],
+
+            //MAPA
+            [105, 105, 105, 105, 105, 105, 105, 105, 105, 105, 105, 105, 105, 105, 105, 105],
+            [105, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 105],
+            [105, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 105],
+            [105, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 105],
+            [105, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 105],
+            [105, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 105],
+            [105, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 105],
+            [105, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 105],
+            [105, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 105],
+            [105, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 105],
+            [105, 105, 105, 105, 105, 105, 105, 104, 104, 105, 105, 105, 105, 105, 105, 105],
+            [105, 105, 105, 105, 105, 105, 105, 28, 28, 105, 105, 105, 105, 105, 105, 105]
         ]
     ]
 
     imagen = new Image()
-    imagen.src = "./Images/tiles-overworld.png"
+    imagen.src = "./Images/tiles-overworld2.png"
 
 
     function Draw() {
+        console.log(link.nombre);
         ctx.clearRect(0, 0, ANCHOCANVAS, ALTOCANVAS);
-        // console.log(link);
-        //MAPA
-        drawWorld()
-        checkWorldObjects()
+        if (enter) {
+            // console.log(link);
+            //MAPA
+            nombre = document.getElementById('nombre').value
+            document.getElementById('nombre').style.display = 'none'
 
-        //ENEMIGOS
-        generarPersonajesPantalla(indiceMap)
+            link.nombre = nombre
 
-        //ELIMINAR ESTO
-        link.vida = link.maxVida
+            drawWorld()
+            checkWorldObjects()
 
-        //JUGADOR
-        link.soltarBomba()
-        link.pintarJugador()
-        link.moverJugador()
-        link.atacar()
+            //ENEMIGOS
+            generarPersonajesPantalla(indiceMap)
 
-        //COMPROBAR COLISION ENE
-        checkEnemyCol()
-        ItemController()
-        //HUD
-        drawHUD()
+            //JUGADOR
+            link.soltarBomba()
+            link.pintarJugador()
+            link.moverJugador()
+            link.atacar()
+
+            //COMPROBAR COLISION ENE
+            checkEnemyCol()
+            ItemController()
+            //HUD
+            drawHUD()
+
+            checkPlayerHealth()
+        }
+        else {
+            pantallaInicio()
+        }
+
+
 
     }
 
-    function checkEnemyCol() {
-        if (link.vida === 0) {
+    function pantallaInicio() {
+
+        console.log(enter);
+        ctx.font = '16px zeldaNes';
+        ctx.fillStyle = 'yellowgreen'
+        ctx.fillText('ZELDA NES JS', (ANCHOCANVAS / 2) - 90, ALTOCANVAS / 2 - 30);
+
+        ctx.font = '7px zeldaNes';
+        ctx.fillStyle = 'white'
+        ctx.fillText('PRESS ENTER', (ANCHOCANVAS / 2) - 35, ALTOCANVAS / 2 - 10);
+
+        ctx.font = '7px zeldaNes';
+        ctx.fillStyle = 'white'
+        ctx.fillText('JAVIER COLMENA MARTOS', (ANCHOCANVAS / 2) - 70, ALTOCANVAS / 2 + 50);
+
+
+    }
+
+    function pantallaMuerte() {
+        ctx.clearRect(0, 0, ANCHOCANVAS, ALTOCANVAS);
+        ctx.font = '16px zeldaNes';
+        ctx.fillStyle = 'red'
+        ctx.fillText('Has perdido', (ANCHOCANVAS / 2) - 90, ALTOCANVAS / 2);
+
+        ctx.font = '7px zeldaNes';
+        ctx.fillStyle = 'white'
+        ctx.fillText('otra vez sera...', (ANCHOCANVAS / 2) - 55, ALTOCANVAS / 2 + 20);
+    }
+
+    function checkPlayerHealth() {
+        if (link.vida <= 0) {
+            ctx.clearRect(0, 0, ANCHOCANVAS, ALTOCANVAS);
+
             overworldSnd.pause()
             caveSnd.pause()
             enemySnd.pause()
+            bossSnd.pause()
 
+            gameOverSnd.play()
 
             clearInterval(id1)
             clearInterval(animation)
+
+            pantallaMuerte()
             console.log('Has muerto')
         }
+    }
+    function checkEnemyCol() {
 
         let enemiesToRemove = [];
 
@@ -910,10 +993,10 @@ window.onload = () => {
 
 
             }
-            link.bombasSoltadas.forEach(bomba =>{
-                if(bomba.explotada && octorok.colisiona(bomba)){
+            link.bombasSoltadas.forEach(bomba => {
+                if (bomba.explotada && octorok.colisiona(bomba)) {
                     octorok.vida--
-                    
+
                     if (octorok.vida <= 0) {
                         octorok.estado = 'muerto'
                         octorok.isMoving = false;
@@ -983,8 +1066,8 @@ window.onload = () => {
         hud.src = "./Images/hud.png"
         ctx.save()
         ctx.globalAlpha = 1;
-        ctx.fillRect(0, 0, 256, 65)
         ctx.fillStyle = 'black'
+        ctx.fillRect(0, 0, 256, 65)
         //HUD PRINCIPAL 256 x 56
         ctx.drawImage(hud, // Imagen completa con todos los comecocos (Sprite)
             258,    // Posicion X del sprite donde se encuentra el comecocos que voy a recortar del sprite para dibujar
@@ -1341,7 +1424,9 @@ window.onload = () => {
             case 0:
             case 2:
                 caveSnd.currentTime = 0
+                bossSnd.currentTime = 0
                 overworldSnd.play()
+                bossSnd.pause()
                 link.ubicacion = 'overworld'
                 break;
             case 1:
@@ -1351,6 +1436,13 @@ window.onload = () => {
                 caveSnd.play()
 
                 link.ubicacion = 'cueva'
+                break;
+            case 3:
+                overworldSnd.pause()
+                caveSnd.pause()
+                bossSnd.play()
+
+                link.ubicacion = 'dungeon'
                 break;
         }
 
@@ -1369,15 +1461,29 @@ window.onload = () => {
             link.x = oldLinkX
             link.y = oldLinkY
         }
+
         //PANTALLA 3 COORD
         if (link.entrando === true && indiceMap === 2) {
             link.x = ANCHOCANVAS / 2 - 8
             link.y = ALTOCANVAS - 30
         }
         else if (link.entrando === true && indiceMap === 0) {
+            oldIndexMap = 0
             link.x = oldLinkX
-            link.y = oldLinkY + 5
+            link.y = oldLinkY
         }
+
+        //PANTALLA 4 COORD
+        if (link.entrando === true && indiceMap === 3) {
+            oldIndexMap = 3
+            link.x = ANCHOCANVAS / 2 - 8
+            link.y = ALTOCANVAS - 30
+        }
+        else if (link.entrando === true && indiceMap === 2 && oldIndexMap === 3) {
+            link.x = oldLinkX
+            link.y = 130
+        }
+
 
     }
 
@@ -1478,13 +1584,44 @@ window.onload = () => {
                             setTimeout(() => {
                                 link.entrando = false
                             }, 100)
+                            console.log('salida');
+                        }
+                    }
+                    //TODO
+                    //IR DE LA PANTALLA 3 A LA 4 //FINAL
+                    if (indiceMap === 2 && map[i][j] === 28) {
+                        if (x <= j * 16 + 12 &&
+                            x + 12 >= j * 16 &&
+                            y + 10 <= i * 16 + 16 &&
+                            y + 14 >= i * 16) {
+
+                            indiceMap = 3
+                            link.entrando = true
+                            setTimeout(() => {
+                                link.entrando = false
+                            }, 100)
                             console.log('entrada');
+                        }
+                    }
+                    // VOLVER DE LA PANTALLA 4 A LA 2
+                    else if (indiceMap === 3 && map[i][j] === 28) {
+                        if (x <= j * 16 + 12 &&
+                            x + 12 >= j * 16 &&
+                            y + 10 <= i * 16 + 16 &&
+                            y + 14 >= i * 16) {
+
+                            indiceMap = 2
+                            link.entrando = true
+                            setTimeout(() => {
+                                link.entrando = false
+                            }, 100)
+                            console.log('salida');
                         }
                     }
                 }
 
                 //COLISIONES CON EL RESTO DEL MAPA
-                if (map[i][j] != 2 && map[i][j] != 34) {
+                if (map[i][j] != 2 && map[i][j] != 34 && map[i][j] != 104) {
                     if (x <= j * 16 + 12 &&
                         x + 12 >= j * 16 &&
                         y + 10 <= i * 16 + 16 &&
@@ -1536,7 +1673,10 @@ window.onload = () => {
             case 67:
                 link.isBomb = true;
                 break;
+        }
 
+        if (evt.key === 'Enter') {
+            enter = true
         }
 
     }

@@ -3,13 +3,20 @@
     src: url('../the-legend-of-zelda-nes.ttf') format('truetype');
     /* Ajusta la ruta y el formato según la fuente que estés utilizando */
 }
+
 body {
     display: flex;
     align-items: center;
     justify-content: center;
     background-color: black;
 }
-
+body *{
+    border: 2px solid white;
+}
+#nombre{
+    position: absolute;
+    margin-top: 30px;
+}
 canvas {
     image-rendering: pixelated;
 }
