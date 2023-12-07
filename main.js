@@ -17,6 +17,11 @@ window.onload = () => {
     let oldLinkX, oldLinkY
 
     let octoroks = []
+    let enemigosFinales = []
+    for (let i = 0; i < 10; i++) {
+        let enemigo = new Enemigo(16 * i + 20 * 2, ALTOCANVAS / 2 - 4 * 2, 2, 'ganon')
+        enemigosFinales.push(enemigo)
+    }
     let personajes = []
     let items = []
     let isGenerate = false;
@@ -88,7 +93,7 @@ window.onload = () => {
 
         //VIDA
         this.maxVida = 6
-        this.vida = 3
+        this.vida = 6
 
         this.x = x
         this.y = y
@@ -159,9 +164,8 @@ window.onload = () => {
                     let bomba = new Item('bomba', 1, this.x + 4, this.y + 4, 8, 12)
 
                     this.bombasSoltadas.push(bomba)
-
-                    this.bombas--
                     this.soltando = true
+                    this.bombas--
                 }
             }
             else {
@@ -170,7 +174,7 @@ window.onload = () => {
             //DIBUJAR BOMBAS
             this.bombasSoltadas.forEach((bomba, index) => {
                 bomba.dibujarItem()
-
+                console.log(bomba.explotada);
                 if (bomba.explotada) {
                     bombSnd.play()
 
@@ -219,7 +223,6 @@ window.onload = () => {
 
         this.recibirDanio = function () {
             if (!this.parpadeando) {
-                this.vida -= 10;
                 this.parpadear();
             }
         }
@@ -485,6 +488,33 @@ window.onload = () => {
             }
         }
 
+        Player.prototype.getLocalStorage = function () {
+            const storedData = JSON.parse(localStorage.getItem("player")) || {};
+            this.x = storedData.x || this.x
+            this.y = storedData.y || this.y
+            this.haveSword = storedData.haveSword || this.haveSword
+            this.ubicacion = storedData.ubicacion || this.ubicacion;
+            this.rupias = storedData.rupias || this.rupias;
+            this.llaves = storedData.llaves || this.llaves;
+            this.bombas = storedData.bombas || this.bombas;
+            indiceMap = storedData.indiceMap || indiceMap
+        };
+
+        Player.prototype.setLocalStorage = function () {
+            const dataToStore = {
+                x: this.x,
+                y: this.y,
+                haveSword: this.haveSword,
+                ubicacion: this.ubicacion,
+                rupias: this.rupias,
+                llaves: this.llaves,
+                bombas: this.bombas,
+                indiceMap: indiceMap
+            };
+
+            localStorage.setItem("player", JSON.stringify(dataToStore));
+        };
+
     }
 
     Player.prototype.imagen = imagen
@@ -497,6 +527,8 @@ window.onload = () => {
         this.y = y
 
         this.nombre = nombre;
+
+        this.canMove = false;
 
         this.tileSize = 16
 
@@ -521,6 +553,14 @@ window.onload = () => {
                 [31, 0], [31, 30],//IZQUIERDA
                 [60, 0], [60, 30],//ARRIBA
                 [90, 0], [90, 30]//DERECHA
+            ]
+        }
+        else if (this.nombre === 'ganon') {
+            this.animacionEnemigo = [
+                [120, 120], [120, 120 + 30],//ABAJO
+                [120 + 31, 120], [120 + 31, 120 + 30],//IZQUIERDA
+                [120 + 60, 120], [120 + 60, 120 + 30],//ARRIBA
+                [120 + 90, 120], [120 + 90, 120 + 30]//DERECHA
             ]
         }
 
@@ -707,7 +747,7 @@ window.onload = () => {
             items.forEach(item => {
                 item.dibujarItem()
                 let index = items.indexOf(item)
-                if (link.colisiona(item)) {
+                if (link.haveSword || link.colisiona(item)) {
                     if (item.nombre === 'espada') {
                         link.itemUsing[0].nombre = 'espada'
                         itemSnd.play()
@@ -857,15 +897,15 @@ window.onload = () => {
 
             //MAPA
             [105, 105, 105, 105, 105, 105, 105, 105, 105, 105, 105, 105, 105, 105, 105, 105],
-            [105, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 105],
-            [105, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 105],
-            [105, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 105],
-            [105, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 105],
-            [105, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 105],
-            [105, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 105],
-            [105, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 105],
-            [105, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 105],
-            [105, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 105],
+            [105, 105, 105, 105, 105, 105, 105, 105, 105, 105, 105, 105, 105, 105, 105, 105],
+            [105, 105, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 105, 105],
+            [105, 105, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 105, 105],
+            [105, 105, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 105, 105],
+            [105, 105, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 105, 105],
+            [105, 105, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 105, 105],
+            [105, 105, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 105, 105],
+            [105, 105, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 105, 105],
+            [105, 105, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 105, 105],
             [105, 105, 105, 105, 105, 105, 105, 104, 104, 105, 105, 105, 105, 105, 105, 105],
             [105, 105, 105, 105, 105, 105, 105, 28, 28, 105, 105, 105, 105, 105, 105, 105]
         ]
@@ -876,7 +916,6 @@ window.onload = () => {
 
 
     function Draw() {
-        console.log(link.nombre);
         ctx.clearRect(0, 0, ANCHOCANVAS, ALTOCANVAS);
         if (enter) {
             // console.log(link);
@@ -891,6 +930,7 @@ window.onload = () => {
 
             //ENEMIGOS
             generarPersonajesPantalla(indiceMap)
+            spawnBoss()
 
             //JUGADOR
             link.soltarBomba()
@@ -905,6 +945,8 @@ window.onload = () => {
             drawHUD()
 
             checkPlayerHealth()
+            // setPlayerData()
+
         }
         else {
             pantallaInicio()
@@ -932,7 +974,23 @@ window.onload = () => {
 
     }
 
+    function pantallaGanador() {
+        ctx.save()
+        ctx.globalAlpha = 1
+        ctx.clearRect(0, 0, ANCHOCANVAS, ALTOCANVAS);
+        ctx.font = '16px zeldaNes';
+        ctx.fillStyle = 'yellow'
+        ctx.fillText('Has ganado', (ANCHOCANVAS / 2) - 80, ALTOCANVAS / 2);
+
+        ctx.font = '7px zeldaNes';
+        ctx.fillStyle = 'white'
+        ctx.fillText('enhorabuena', (ANCHOCANVAS / 2) - 40, ALTOCANVAS / 2 + 20);
+        ctx.restore()
+    }
+
     function pantallaMuerte() {
+        ctx.save()
+        ctx.globalAlpha = 1
         ctx.clearRect(0, 0, ANCHOCANVAS, ALTOCANVAS);
         ctx.font = '16px zeldaNes';
         ctx.fillStyle = 'red'
@@ -941,10 +999,126 @@ window.onload = () => {
         ctx.font = '7px zeldaNes';
         ctx.fillStyle = 'white'
         ctx.fillText('otra vez sera...', (ANCHOCANVAS / 2) - 55, ALTOCANVAS / 2 + 20);
+        ctx.restore()
+    }
+
+    function spawnBoss() {
+        if (indiceMap === 3) {
+            let enemiesToRemove = [];
+            enemigosFinales.forEach(enemigo => {
+                enemigo.pintarEnemigo()
+                enemigo.moverEnemigo()
+            });
+            enemigosFinales.forEach(enemigo => {
+                if (!(link.kinematic) && link.colisiona(enemigo)) {
+
+                    // NOCKBACK
+                    if (link.posicion === 0 || link.posicion === 1) {
+                        link.y -= 10
+                    }
+                    else if (link.posicion === 2 || link.posicion === 3) {
+                        link.x += 10
+                    }
+                    else if (link.posicion === 4 || link.posicion === 5) {
+                        link.x -= 10
+                    }
+                    else if (link.posicion === 6 || link.posicion === 7) {
+                        link.y += 10
+                    }
+                    if (enemigo.estado != 'muerto') {
+                        link.recibirDanio()
+                    }
+
+                    // console.log('Link VIDA: ' + link.vida);
+
+                    setTimeout(function () {
+                        link.kinematic = false
+                    }, 2000)
+
+
+                }
+                link.bombasSoltadas.forEach(bomba => {
+                    if (bomba.explotada && enemigo.colisiona(bomba)) {
+                        enemigo.vida--
+
+                        if (enemigo.vida <= 0) {
+                            enemigo.estado = 'muerto'
+                            enemigo.isMoving = false;
+                            enemigo.vida = 0
+                            setTimeout(function () {
+                                if (enemigo.randomItem === 1 && !enemigo.itemGenerate) {
+                                    itemEnemigo.push(new Item('rupia', 5, enemigo.x, enemigo.y, 8, 16))
+                                    enemigo.itemGenerate = true
+                                }
+                                else if (enemigo.randomItem === 2 && !enemigo.itemGenerate) {
+                                    itemEnemigo.push(new Item('corazon', 1, enemigo.x, enemigo.y, 8, 8))
+                                    enemigo.itemGenerate = true
+                                }
+                                enemiesToRemove.push(enemigo);
+                                enemySnd.play()
+                            }, 200);
+                        }
+                    }
+                })
+                if (link.isAtacking && link.espada.colisiona(enemigo)) {
+                    link.kinematic = true
+
+                    setTimeout(function () {
+                        link.kinematic = false
+                    }, 1000)
+
+                    enemigo.vida--
+
+                    if (enemigo.vida <= 0) {
+                        enemigo.estado = 'muerto'
+                        enemigo.isMoving = false;
+                        enemigo.vida = 0
+                        setTimeout(function () {
+                            if (enemigo.randomItem === 1 && !enemigo.itemGenerate) {
+                                itemEnemigo.push(new Item('rupia', 5, enemigo.x, enemigo.y, 8, 16))
+                                enemigo.itemGenerate = true
+                            }
+                            else if (enemigo.randomItem === 2 && !enemigo.itemGenerate) {
+                                itemEnemigo.push(new Item('corazon', 1, enemigo.x, enemigo.y, 8, 8))
+                                enemigo.itemGenerate = true
+                            }
+                            enemiesToRemove.push(enemigo);
+                            enemySnd.play()
+                        }, 200);
+                    }
+
+                }
+
+            });
+
+            setTimeout(function () {
+                enemiesToRemove.forEach(enemyToRemove => {
+                    const index = enemigosFinales.indexOf(enemyToRemove);
+                    if (index !== -1) {
+                        enemigosFinales.splice(index, 1);
+                    }
+                });
+            }, 200);
+
+        }
     }
 
     function checkPlayerHealth() {
-        if (link.vida <= 0) {
+        if(enemigosFinales.length === 0){
+            ctx.clearRect(0, 0, ANCHOCANVAS, ALTOCANVAS);
+
+            overworldSnd.pause()
+            caveSnd.pause()
+            enemySnd.pause()
+            bossSnd.pause()
+
+
+            clearInterval(id1)
+            clearInterval(animation)
+
+            pantallaGanador()
+        }
+        else if (link.vida <= 0) {
             ctx.clearRect(0, 0, ANCHOCANVAS, ALTOCANVAS);
 
             overworldSnd.pause()
@@ -964,6 +1138,15 @@ window.onload = () => {
     function checkEnemyCol() {
 
         let enemiesToRemove = [];
+
+        if(octoroks.length > 0){
+            overworld[2][7][7] = 55
+            overworld[2][7][8] = 55
+        }
+        else{
+            overworld[2][7][7] = 28
+            overworld[2][7][8] = 28
+        }
 
         octoroks.forEach(octorok => {
             if (!(link.kinematic) && link.colisiona(octorok)) {
@@ -1329,7 +1512,7 @@ window.onload = () => {
 
         Item.prototype.dropItemController = function () {
 
-            if (indiceMap === 2 || indiceMap === 1 || indiceMap === 0) {
+            if (!link.entrando) {
                 this.dibujarItem()
                 if (link.colisiona(this) && this.nombre === 'rupia') {
                     rupeeSnd.currentTime = 0
@@ -1516,6 +1699,14 @@ window.onload = () => {
             }
             else {
                 octorok.posicion = (octorok.posicion + 1) % 4
+            }
+        });
+        enemigosFinales.forEach(enemigo => {
+            if (enemigo.isMoving && enemigo.estado === 'idle') {
+                enemigo.posicion = enemigo.inicial + (enemigo.posicion + 1) % 2
+            }
+            else {
+                enemigo.posicion = (enemigo.posicion + 1) % 4
             }
         });
     }
@@ -1713,4 +1904,4 @@ window.onload = () => {
 
         link.isMoving = xIzquierda || yArriba || xDerecha || yAbajo;
     }
-}
+    }
